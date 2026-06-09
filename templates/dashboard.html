@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALGOLINGO Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <header class="top-bar">
+
+        <div>
+            <h1>Welcome {{ username }}</h1>
+            <p>Ready for today's coding adventure?</p>
+        </div>
+
+        <a href="/logout" class="logout-btn">
+            Logout
+        </a>
+
+    </header>
+
+    <section class="stats-section">
+
+        <div class="stat-card">
+            <h3>Level</h3>
+            <p>1</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>XP</h3>
+            <p>0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Streak</h3>
+            <p>0 Days</p>
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2 class="section-title">
+            Choose Your Tower
+        </h2>
+
+        <div class="tower-grid">
+
+            <div class="tower-card">
+                <h3>🐍 Python Tower</h3>
+                <p>Variables, Loops, Functions & More</p>
+            </div>
+
+            <div class="tower-card">
+                <h3>☕ Java Tower</h3>
+                <p>OOP, Classes, Objects & Projects</p>
+            </div>
+
+            <div class="tower-card">
+                <h3>⚙️ C++ Tower</h3>
+                <p>Programming Fundamentals & STL</p>
+            </div>
+
+            <div class="tower-card">
+                <h3>🌳 DSA Tower</h3>
+                <p>Arrays, Trees, Graphs & Algorithms</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="recent-activity">
+
+        <h2>Recent Activity</h2>
+
+        <ul>
+            <li>No activity yet.</li>
+            <li>Start your first tower adventure.</li>
+        </ul>
+
+    </section>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+</body>
+</html>
