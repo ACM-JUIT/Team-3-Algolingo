@@ -1,0 +1,503 @@
+/* Core Configurations & Global Styles */
+:root {
+    --bg-white: #ffffff;
+    --bg-dark-panel: #0a0a0c;
+    --bg-dark-wrapper: #111115;
+    --text-dark: #000000;
+    --text-muted: #666666;
+    --text-light: #ffffff;
+    --text-gray-light: #aaaaaa;
+    --border-color: #dbdbdb;
+    --focus-ring: #000000;
+    --error-color: #ff3333;
+    --success-color: #00cc66;
+    --font-sans: 'Inter', sans-serif;
+    --font-display: 'Montserrat', sans-serif;
+    --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+/* Authentication Container Layout */
+.auth-container {
+    background-color: var(--bg-white);
+    width: 100%;
+    max-width: 1100px;
+    height: 720px; /* Enhanced signature headroom context height to seamlessly frame the signup structural stack layers */
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    display: flex;
+    overflow: hidden;
+}
+
+/* Left Panel - Forms styling */
+.auth-form-side {
+    flex: 1;
+    background-color: var(--bg-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 60px;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-heading {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+/* OAuth Google Action Component */
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    height: 52px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-white);
+    border-radius: 50px;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.btn-google:hover {
+    background-color: #f7f7f7;
+    border-color: #adadad;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Separator Line styling */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 18px 0;
+    color: var(--border-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.divider span {
+    padding: 0 15px;
+    color: #999999;
+}
+
+/* Form Fields & Dynamic Floating Labels */
+.input-group {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.input-group input {
+    width: 100%;
+    height: 52px;
+    padding: 14px 24px;
+    padding-right: 50px;
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    outline: none;
+    background-color: transparent;
+    transition: var(--transition-smooth);
+    color: var(--text-dark);
+}
+
+.input-group input:focus {
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 1px var(--focus-ring);
+}
+
+/* Label Transitions */
+.input-group label {
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--bg-white);
+    padding: 0 4px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: 0.2s ease all;
+}
+
+/* Floating Label Logic triggered via placeholder trickery */
+.input-group input:focus ~ label,
+.input-group input:not(:placeholder-shown) ~ label {
+    top: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Error configurations */
+.input-group input.invalid {
+    border-color: var(--error-color) !important;
+}
+
+.input-group input.invalid ~ label {
+    color: var(--error-color) !important;
+}
+
+.error-text {
+    font-size: 0.75rem;
+    color: var(--error-color);
+    margin-top: 4px;
+    margin-left: 20px;
+    display: block;
+    font-weight: 500;
+}
+
+.block-error {
+    margin-left: 0;
+    margin-top: 6px;
+}
+
+/* Toggle element interaction */
+.password-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.password-toggle:hover {
+    color: var(--text-dark);
+}
+
+/* Checkboxes and recovery anchors */
+.form-options {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 22px;
+    font-size: 0.82rem;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
+    color: var(--text-dark);
+    user-select: none;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    height: 18px;
+    width: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-white);
+    transition: var(--transition-smooth);
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    border-color: #888888;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--text-dark);
+    border-color: var(--text-dark);
+}
+
+.checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-container input:checked ~ .checkmark::after {
+    display: block;
+}
+
+/* Core Form CTA Submission element */
+.btn-submit {
+    width: 100%;
+    height: 52px;
+    background-color: var(--text-dark);
+    color: var(--text-light);
+    border: none;
+    border-radius: 50px;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.btn-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    background-color: #1a1a22;
+}
+
+.btn-submit:active {
+    transform: translateY(1px);
+}
+
+/* Footer Section Switch links */
+.auth-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.auth-footer a {
+    color: var(--text-dark);
+    text-decoration: underline;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+}
+
+.auth-footer a:hover {
+    color: #444444;
+}
+
+/* Notification banner engine styles */
+.message-banner {
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    transition: var(--transition-smooth);
+}
+
+.message-banner.success {
+    background-color: #e6fcf5;
+    color: var(--success-color);
+    border: 1px solid #c3fae8;
+}
+
+.message-banner.error {
+    background-color: #fff5f5;
+    color: var(--error-color);
+    border: 1px solid #ffe3e3;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Right Panel - Branding Display and Visual Artwork Frame */
+.auth-image-side {
+    flex: 1.1;
+    background-color: var(--bg-dark-panel);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.branding-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2.3rem;
+    color: var(--text-light);
+    letter-spacing: 4px;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    word-break: break-word;
+}
+
+.image-frame-wrapper {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+}
+
+.image-frame {
+    width: 100%;
+    height: 100%;
+    max-height: 520px; /* Auto balanced scale allocation match mapping */
+    background-color: var(--bg-dark-wrapper);
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: var(--transition-smooth);
+    border: 1px solid #1f1f27;
+}
+
+.image-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+.tower-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Smooth Interactive Micro-Glow effects */
+.image-frame:hover {
+    border-color: #2f2f3d;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 15px 35px rgba(106, 17, 203, 0.15);
+}
+
+.image-frame:hover .tower-img {
+    transform: scale(1.04);
+}
+
+/* Keyframe Micro-animations for layout loading sequences */
+.animate-fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Comprehensive Breakpoint Media Query Engine */
+@media (max-width: 992px) {
+    .auth-container {
+        max-width: 720px;
+        height: auto;
+        flex-direction: column;
+        border-radius: 24px;
+    }
+
+    .auth-form-side {
+        padding: 40px 30px;
+    }
+
+    .auth-image-side {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .auth-container {
+        border-radius: 20px;
+    }
+
+    .form-heading {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .auth-form-side {
+        padding: 30px 20px;
+    }
+
+    .input-group input {
+        height: 48px;
+        padding: 12px 20px;
+    }
+
+    .input-group label {
+        left: 20px;
+    }
+
+    .btn-google, .btn-submit {
+        height: 48px;
+    }
+}
