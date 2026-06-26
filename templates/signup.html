@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Prime Code Quest</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+    <div class="auth-container animate-fade-in">
+        <!-- Left Side: Authentication Form -->
+        <div class="auth-form-side">
+            <div class="form-wrapper">
+                <h1 class="form-heading">CREATE YOUR ACCOUNT</h1>
+                
+                <!-- Google Sign-Up Button -->
+                <button type="button" class="btn-google">
+                    <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    <span>Sign Up With Google</span>
+                </button>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <!-- Live Notification/Error Banner -->
+                <div id="message-banner" class="message-banner hidden"></div>
+
+                <!-- Form Panel -->
+<form id="signup-form" method="POST" action="/register" novalidate>
+
+    <!-- Name Input -->
+    <div class="input-group">
+        <input
+            type="text"
+            id="fullname"
+            name="username"
+            placeholder=" "
+            required
+            autocomplete="name"
+        >
+        <label for="fullname">Enter Your Name</label>
+        <span class="error-text" id="name-error"></span>
+    </div>
+
+    <!-- Email Input -->
+    <div class="input-group">
+        <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder=" "
+            required
+            autocomplete="email"
+        >
+        <label for="email">Enter Your Email</label>
+        <span class="error-text" id="email-error"></span>
+    </div>
+
+    <!-- Password Input -->
+    <div class="input-group">
+        <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder=" "
+            required
+            autocomplete="new-password"
+        >
+        <label for="password">Enter Your Password</label>
+
+        <button
+            type="button"
+            class="password-toggle"
+            id="password-toggle"
+            aria-label="Toggle password visibility"
+        >
+            <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+        </button>
+
+        <span class="error-text" id="password-error"></span>
+    </div>
+
+    <!-- Terms Checkbox Row -->
+    <div class="form-options">
+        <label class="checkbox-container">
+            <input
+                type="checkbox"
+                id="terms"
+                required
+            >
+            <span class="checkmark"></span>
+            I agree to all the terms, conditions and privacy policies.
+        </label>
+
+        <span class="error-text block-error" id="terms-error"></span>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn-submit">
+        Sign Up
+    </button>
+
+</form>
+
+                <!-- Navigation Footer -->
+                <p class="auth-footer">
+                    Already have an Account? <a href="{{ url_for('login') }} ">Log in</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side: Dark Gaming/Branding Panel -->
+        <div class="auth-image-side">
+            <div class="branding-container">
+                <h2 class="brand-title">ALGOLINGO</h2>
+                <div class="image-frame-wrapper">
+                    <div class="image-frame">
+                        <img src="{{ url_for('static', filename='tower.png') }}" alt="Ancient Programming Tower" class="tower-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script File -->
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>
