@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Embark on an 8-bit retro puzzle dungeon crawler to master Data Structures and Algorithms. Conquer the DSA Tower and unlock legendary gear at Algolingo.">
+    <title>ALGOLINGO - Conquer the DSA Tower</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Retro Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="logo">ALGOLINGO</a>
+            <nav class="nav-links">
+                <a href="#quest">QUEST</a>
+                <a href="#bestiary">BESTIARY</a>
+                <a href="#equipment">EQUIPMENT</a>
+                <a href="#lore">LORE</a>
+            </nav>
+            <a href="/login" class="btn btn-primary start-quest-btn">START QUEST</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-bg-overlay"></div>
+        <div class="hero-content">
+            <div class="level-badge">[ LEVEL 01: THE FOUNDATION ]</div>
+            <h1 class="hero-title">CONQUER THE <span class="highlight-green">DSA TOWER</span></h1>
+            <p class="hero-desc">
+                The Algorithm of a lifetime. Are you ready to reach the summit? 
+                Master the ancient structures and optimize your path through the darkness.
+            </p>
+            <div class="hero-actions">
+                <a href="/login" class="btn btn-primary btn-lg">ENTER THE DUNGEON</a>
+                <a href="#quest" class="btn btn-stone btn-lg">VIEW MANUAL</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Legend section -->
+    <section id="quest" class="section legend-section">
+        <div class="section-container">
+            <h2 class="section-title text-gold">THE LEGEND OF THE TOWER</h2>
+            <div class="legend-grid">
+                <!-- Left: Viewport Box -->
+                <div class="inner-window legend-viewport reveal">
+                    <div class="viewport-content">
+                        <img src="{{ url_for('static', filename='monsters_spritesheet.png') }}" alt="The Tower and Monster Grid" class="legend-img">
+                        <div class="viewport-caption">
+                            "The tower was built by the Great Architect to house the logic of the world."
+                        </div>
+                    </div>
+                </div>
+                <!-- Right: Content -->
+                <div class="legend-info stagger-container">
+                    <div class="info-item reveal">
+                        <div class="info-icon icon-purple">
+                            <!-- Shield Icon SVG -->
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <div class="info-text">
+                            <h3>Defeat the Gatekeepers</h3>
+                            <p>Each floor is guarded by a manifestation of a complex data structure. To pass, you must demonstrate your command over their logic.</p>
+                        </div>
+                    </div>
+                    <div class="info-item reveal">
+                        <div class="info-icon icon-green">
+                            <!-- Code Code brackets SVG -->
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                        </div>
+                        <div class="info-text">
+                            <h3>Master the Code</h3>
+                            <p>Optimize your solutions to earn legendary status. Time complexity is your greatest weapon; space complexity is your shield.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Monster Bestiary Section -->
+    <section id="bestiary" class="section bestiary-section">
+        <div class="section-container">
+            <h2 class="section-title text-purple">THE MONSTER BESTIARY</h2>
+            <p class="section-subtitle">Know your enemies before you face them in the pits of recursion.</p>
+            
+            <div class="cards-grid stagger-container">
+                <!-- Card 1 -->
+                <div class="card monster-card reveal">
+                    <div class="card-header bg-green">
+                        <div class="sprite-crop green-slime-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}');"></div>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="monster-name">THE SLIME OF SORTING</h3>
+                        <p class="monster-desc">
+                            A jelly-like creature that divides itself to conquer. Only Bubble, Merge, or Quick strikes can pierce its defenses.
+                        </p>
+                        <div class="difficulty-row">
+                            <span class="diff-label">DIFFICULTY</span>
+                            <span class="diff-value text-green">EASY</span>
+                        </div>
+                        <div class="hp-bar border-green">
+                            <div class="hp-segment filled bg-green"></div>
+                            <div class="hp-segment filled bg-green"></div>
+                            <div class="hp-segment filled bg-green"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="card monster-card reveal">
+                    <div class="card-header bg-purple">
+                        <div class="sprite-crop skeleton-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}');"></div>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="monster-name">SKELETON OF STACKS</h3>
+                        <p class="monster-desc">
+                            An undead guardian that only remembers the last person who hit it. First in, last out—it's a battle of LIFO logic.
+                        </p>
+                        <div class="difficulty-row">
+                            <span class="diff-label">DIFFICULTY</span>
+                            <span class="diff-value text-gold">MEDIUM</span>
+                        </div>
+                        <div class="hp-bar border-gold">
+                            <div class="hp-segment filled bg-gold"></div>
+                            <div class="hp-segment filled bg-gold"></div>
+                            <div class="hp-segment filled bg-gold"></div>
+                            <div class="hp-segment filled bg-gold"></div>
+                            <div class="hp-segment filled bg-gold"></div>
+                            <div class="hp-segment filled bg-gold"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                            <div class="hp-segment"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="card monster-card reveal">
+                    <div class="card-header bg-red">
+                        <div class="sprite-crop beholder-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}');"></div>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="monster-name">BEHOLDER OF BINARY</h3>
+                        <p class="monster-desc">
+                            A many-eyed beast with a branch-like structure. It sees all paths simultaneously. Balance your tree or be consumed.
+                        </p>
+                        <div class="difficulty-row">
+                            <span class="diff-label">DIFFICULTY</span>
+                            <span class="diff-value text-red">HARD</span>
+                        </div>
+                        <div class="hp-bar border-red">
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment filled bg-red"></div>
+                            <div class="hp-segment"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Armory & Vault Section -->
+    <section id="equipment" class="section armory-section">
+        <div class="section-container">
+            <div class="armory-layout">
+                <!-- Left panel -->
+                <div class="armory-text-panel reveal">
+                    <h2 class="section-title text-white">ARMORY & VAULT</h2>
+                    <p class="section-desc">
+                        Solve challenges to unlock legendary gear. Customize your pixel-avatar to show your prowess in the tower.
+                    </p>
+                    
+                    <div class="gear-status-list">
+                        <!-- Key -->
+                        <div class="gear-status-item unlocked">
+                            <div class="gear-icon-circle bg-gold" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}');"></div>
+                            <div class="gear-info-text">
+                                <span class="gear-label">MASTER'S KEY [UNLOCKED]</span>
+                            </div>
+                        </div>
+                        <!-- Wand -->
+                        <div class="gear-status-item locked">
+                            <div class="gear-icon-circle bg-locked">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </div>
+                            <div class="gear-info-text">
+                                <span class="gear-label text-muted">LOGIC WAND [LOCKED]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right grid panel -->
+                <div class="equipment-grid-panel reveal">
+                    <div class="equipment-grid stagger-container">
+                        <!-- Cell 1: Crown -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -320px -25px;"></div>
+                            <span class="eq-name">CROWN</span>
+                        </div>
+                        <!-- Cell 2: Trident -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -470px -245px;"></div>
+                            <span class="eq-name">TRIDENT</span>
+                        </div>
+                        <!-- Cell 3: Medal of DSA -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -620px -25px;"></div>
+                            <span class="eq-name">MEDAL</span>
+                        </div>
+                        <!-- Cell 4: Steel Flute -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -765px -25px;"></div>
+                            <span class="eq-name">FLUTE</span>
+                        </div>
+                        <!-- Cell 5: Logic Boots -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -170px -25px;"></div>
+                            <span class="eq-name">BOOTS</span>
+                        </div>
+                        <!-- Cell 6: Knight Helm -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -470px -365px;"></div>
+                            <span class="eq-name">HELMET</span>
+                        </div>
+                        <!-- Cell 7: HP Potion -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -20px -25px;"></div>
+                            <span class="eq-name">HP POTION</span>
+                        </div>
+                        <!-- Cell 8: Gold Coin -->
+                        <div class="eq-cell reveal">
+                            <div class="eq-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -320px -365px;"></div>
+                            <span class="eq-name">GOLD COIN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="lore" class="section cta-section">
+        <div class="section-container">
+            <div class="cta-card reveal">
+                <div class="cta-badge">[ JOIN THE ADVENTURE ]</div>
+                <h2 class="cta-title">READY TO ASCEND?</h2>
+                <p class="cta-desc">
+                    Thousands of developers are already climbing. Your first challenge awaits on Floor 1.
+                </p>
+                <a href="/login" class="btn btn-primary btn-xl">START YOUR HUNTER JOURNEY</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <span class="logo">ALGOLINGO</span>
+                <span class="copyright">© 2026 TEAM 3 ACM JUIT - ALL RIGHTS RESERVED</span>
+            </div>
+            <div class="footer-right">
+                <div class="footer-links">
+                    <a href="#">STATUS</a>
+                    <a href="#">MANUAL</a>
+                    <a href="#">SUPPORT</a>
+                    <a href="#">COMMUNITY</a>
+                </div>
+                <div class="dpad-button">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M10 3h4v6h-4zM3 10h18v4H3zM10 15h4v6h-4z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Core Javascript -->
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>

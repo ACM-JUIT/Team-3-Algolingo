@@ -1,0 +1,822 @@
+/* ==========================================================================
+   8-Bit Quest / Algolingo CSS Design System
+   Visual Style: Retro / Pixel-Art Brutalism (Game Boy Advance / 32-bit RPG)
+   ========================================================================== */
+
+/* Design Tokens & Variables */
+:root {
+    /* Colors */
+    --surface: #131313;
+    --surface-dim: #131313;
+    --surface-bright: #393939;
+    --surface-container-lowest: #0e0e0e;
+    --surface-container-low: #1c1b1b;
+    --surface-container: #20201f;
+    --surface-container-high: #2a2a2a;
+    --surface-container-highest: #353535;
+    --on-surface: #e5e2e1;
+    --on-surface-variant: #cac3d9;
+    --inverse-surface: #e5e2e1;
+    --inverse-on-surface: #313030;
+    --outline: #938ea2;
+    --outline-variant: #484456;
+    --surface-tint: #cbbeff;
+    
+    --primary: #cbbeff; /* Magic Purple */
+    --on-primary: #330099;
+    --primary-container: #7145ff;
+    --on-primary-container: #f2ecff;
+    --inverse-primary: #6332f1;
+    
+    --secondary: #66df6e; /* Slime Green */
+    --on-secondary: #00390c;
+    --secondary-container: #26a63d;
+    --on-secondary-container: #003209;
+    
+    --tertiary: #f1c100; /* Gold */
+    --on-tertiary: #3d2f00;
+    --tertiary-container: #d0a600;
+    --on-tertiary-container: #4f3d00;
+    
+    --error: #ffb4ab;
+    --on-error: #690005;
+    --error-container: #93000a;
+    --on-error-container: #ffdad6;
+    
+    --black: #000000;
+    --white: #ffffff;
+    
+    /* Typography & Layout spacing */
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --unit: 4px;
+    --gutter: 16px;
+}
+
+/* Base resets & setups */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    image-rendering: pixelated; /* Ensures retro images remain crisp */
+}
+
+html {
+    scroll-behavior: smooth;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+body {
+    background-color: var(--surface);
+    overflow-x: hidden;
+}
+
+/* Typography styles */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-shadow: 2px 2px 0px var(--black);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+}
+
+p {
+    font-family: var(--font-mono);
+    color: var(--on-surface);
+}
+
+.text-gold { color: var(--tertiary); }
+.text-green { color: var(--secondary); }
+.text-purple { color: var(--primary); }
+.text-red { color: var(--error); }
+.text-muted { color: var(--on-surface-variant); }
+
+/* Header / Navigation */
+.header {
+    background-color: var(--surface-container-lowest);
+    border-bottom: 4px solid var(--black);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 64px;
+    display: flex;
+    align-items: center;
+}
+
+.header-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    text-shadow: 2px 2px 0px var(--black);
+    letter-spacing: 1px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 32px;
+}
+
+.nav-links a {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--on-surface);
+    text-decoration: none;
+    padding: 8px 12px;
+    border: 2px solid transparent;
+}
+
+.nav-links a:hover {
+    color: var(--secondary);
+    border: 2px solid var(--black);
+    background-color: var(--surface-container-high);
+}
+
+/* Retro Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border: 2px solid var(--black);
+    border-radius: 0;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px var(--black);
+    position: relative;
+    top: 0;
+    left: 0;
+    transition: none; /* Instant digital game button feedback */
+}
+
+.btn:active {
+    top: 3px;
+    left: 3px;
+    box-shadow: 0px 0px 0px var(--black);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--on-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-fixed-dim);
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: var(--on-secondary);
+}
+
+.btn-stone {
+    background-color: var(--surface-bright);
+    color: var(--on-surface);
+}
+
+.btn-stone:hover {
+    background-color: var(--surface-container-highest);
+}
+
+.btn-lg {
+    padding: 14px 28px;
+    font-size: 16px;
+}
+
+.btn-xl {
+    padding: 18px 36px;
+    font-size: 18px;
+    box-shadow: 4px 4px 0px var(--black);
+}
+
+.btn-xl:active {
+    top: 4px;
+    left: 4px;
+    box-shadow: 0px 0px 0px var(--black);
+}
+
+/* Hero Section */
+.hero-section {
+    position: relative;
+    padding: 120px 32px 100px;
+    background-color: var(--surface-container-lowest);
+    border-bottom: 4px solid var(--black);
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+}
+
+.hero-bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Dithered / dark overlay of monsters spritesheet */
+    background-image: linear-gradient(rgba(19, 19, 19, 0.9), rgba(19, 19, 19, 0.94)), url('../monsters_spritesheet.png');
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+}
+
+.level-badge {
+    font-family: var(--font-mono);
+    color: var(--secondary);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+}
+
+.hero-title {
+    font-size: 56px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: var(--white);
+}
+
+.highlight-green {
+    color: var(--secondary);
+}
+
+.hero-desc {
+    font-size: 18px;
+    color: var(--on-surface);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+/* Generic Section styling */
+.section {
+    padding: 80px 32px;
+    border-bottom: 4px solid var(--black);
+}
+
+.section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-size: 36px;
+    margin-bottom: 16px;
+}
+
+.section-subtitle {
+    font-size: 18px;
+    color: var(--on-surface-variant);
+    margin-bottom: 48px;
+}
+
+/* Inner Window (Game Boy Viewports) */
+.inner-window {
+    background-color: var(--black);
+    padding: 8px;
+    border: 2px solid var(--black);
+    position: relative;
+    /* Nested Stepped Corners clip paths */
+    clip-path: polygon(
+        0 4px, 4px 4px, 4px 0, 
+        calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 
+        100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 
+        4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+    );
+}
+
+.viewport-content {
+    background-color: var(--surface-container-low);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.viewport-caption {
+    background-color: var(--black);
+    color: var(--on-surface);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 12px;
+    border-top: 4px solid var(--black);
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Legend section layout */
+.legend-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.legend-viewport {
+    width: 100%;
+}
+
+.legend-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-bottom: 2px solid var(--black);
+}
+
+.legend-info {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.info-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.info-icon {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0px var(--black);
+    color: var(--black);
+    flex-shrink: 0;
+}
+
+.icon-purple { background-color: var(--primary); }
+.icon-green { background-color: var(--secondary); }
+
+.info-text h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: var(--white);
+}
+
+.info-text p {
+    font-size: 16px;
+    color: var(--on-surface-variant);
+    line-height: 1.5;
+}
+
+/* Monsters Bestiary section */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.card {
+    background-color: var(--surface-container);
+    border: 2px solid var(--black);
+    box-shadow: 4px 4px 0px var(--black);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.monster-card {
+    background-color: var(--surface-container-high);
+}
+
+.card-header {
+    height: 160px;
+    border-bottom: 2px solid var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.bg-green { background-color: var(--secondary-container); }
+.bg-purple { background-color: var(--primary-container); }
+.bg-red { background-color: var(--error-container); }
+
+/* Sprite cropping positions inside the sheet */
+.sprite-crop {
+    background-repeat: no-repeat;
+    /* Original width of monsters spritesheet is 894px, height is 496px */
+    width: 124px;
+    height: 124px;
+    transform: scale(1.3); /* Boost visibility of pixel details */
+}
+
+/* Position offsets for grid crops in monsters_spritesheet.png */
+.green-slime-sprite {
+    background-position: -462px -2px; /* Col 1 Row 1 in right half monster grid */
+}
+
+.skeleton-sprite {
+    background-position: -760px -2px; /* Col 3 Row 1 skeleton */
+}
+
+.beholder-sprite {
+    background-position: -760px -250px; /* Col 3 Row 3 purple beholder */
+}
+
+.card-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.monster-name {
+    font-size: 20px;
+    margin-bottom: 12px;
+    color: var(--white);
+}
+
+.monster-desc {
+    font-size: 14px;
+    color: var(--on-surface-variant);
+    margin-bottom: 24px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.difficulty-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.diff-label {
+    color: var(--on-surface-variant);
+}
+
+/* HP Segmented Bar */
+.hp-bar {
+    display: flex;
+    gap: 2px;
+    border: 2px solid var(--black);
+    background-color: var(--surface-container-lowest);
+    padding: 2px;
+    height: 20px;
+}
+
+.hp-segment {
+    flex: 1;
+    height: 100%;
+    background-color: transparent;
+}
+
+.hp-segment.filled.bg-green { background-color: var(--secondary); }
+.hp-segment.filled.bg-gold { background-color: var(--tertiary); }
+.hp-segment.filled.bg-red { background-color: var(--error); }
+
+/* Armory & Vault section */
+.armory-layout {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.armory-text-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.armory-text-panel .section-desc {
+    font-size: 16px;
+    color: var(--on-surface-variant);
+    line-height: 1.6;
+}
+
+.gear-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.gear-status-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background-color: var(--surface-container-high);
+    border: 2px solid var(--black);
+    padding: 16px;
+    box-shadow: 2px 2px 0px var(--black);
+}
+
+.gear-icon-circle {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--black);
+    flex-shrink: 0;
+}
+
+.gear-status-item.unlocked .gear-icon-circle {
+    background-color: var(--tertiary-container);
+    background-repeat: no-repeat;
+    background-position: -496px -270px; /* Cropped key */
+    background-size: 893px 475px;
+    transform: scale(1.1);
+}
+
+.gear-status-item.locked .gear-icon-circle {
+    background-color: var(--surface-container);
+    color: var(--outline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gear-label {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* Equipment Grid */
+.equipment-grid-panel {
+    background-color: var(--surface-container-high);
+    border: 2px solid var(--black);
+    padding: 32px;
+    box-shadow: 4px 4px 0px var(--black);
+}
+
+.equipment-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.eq-cell {
+    background-color: var(--on-secondary-container); /* Deep dark green */
+    border: 2px solid var(--black);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.05), 2px 2px 0px var(--black);
+}
+
+.eq-cell:hover {
+    border-color: var(--secondary);
+}
+
+.eq-icon {
+    width: 64px;
+    height: 64px;
+    background-repeat: no-repeat;
+    background-size: 893px 475px; /* scale matching original assets layout */
+    transform: scale(1.1);
+}
+
+.eq-name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--secondary);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* CTA Ascent Section */
+.cta-section {
+    background-color: var(--surface-container-lowest);
+    text-align: center;
+    padding: 100px 32px;
+}
+
+.cta-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--surface-container-low);
+    border: 4px solid var(--black);
+    padding: 48px;
+    box-shadow: 6px 6px 0px var(--black);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cta-badge {
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+}
+
+.cta-title {
+    font-size: 40px;
+    color: var(--white);
+    margin-bottom: 16px;
+}
+
+.cta-desc {
+    font-size: 16px;
+    color: var(--on-surface-variant);
+    max-width: 500px;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+/* Footer Section styling */
+.footer {
+    background-color: var(--black);
+    color: var(--on-surface-variant);
+    padding: 32px;
+    border-top: 4px solid var(--black);
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-left .logo {
+    color: var(--primary);
+}
+
+.copyright {
+    font-size: 12px;
+    color: #555555;
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 20px;
+}
+
+.footer-links a {
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.footer-links a:hover {
+    color: var(--secondary);
+}
+
+/* Floating Game Controller Dpad Icon decoration */
+.dpad-button {
+    width: 44px;
+    height: 44px;
+    background-color: var(--secondary);
+    color: var(--on-secondary);
+    border: 2px solid var(--black);
+    box-shadow: 2px 2px 0px var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.dpad-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px var(--black);
+}
+
+/* ==========================================================================
+   Responsive Breakpoint Engine
+   ========================================================================== */
+
+@media (max-width: 992px) {
+    .legend-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    .armory-layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    .cards-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .hero-title {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 0 16px;
+    }
+    .nav-links {
+        display: none; /* Strip link scaffolding on mobile to fit screen space */
+    }
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+    .equipment-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .footer-container {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+    }
+    .footer-right {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .footer-left {
+        align-items: center;
+    }
+    .cta-card {
+        padding: 32px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 28px;
+    }
+    .hero-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .equipment-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Scroll Reveal Animations */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+    will-change: opacity, transform;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered Delay Helpers */
+.stagger-container {
+    --stagger-delay: 0.15s;
+}
+
+.stagger-container .reveal:nth-child(1) { transition-delay: calc(1 * var(--stagger-delay)); }
+.stagger-container .reveal:nth-child(2) { transition-delay: calc(2 * var(--stagger-delay)); }
+.stagger-container .reveal:nth-child(3) { transition-delay: calc(3 * var(--stagger-delay)); }
+.stagger-container .reveal:nth-child(4) { transition-delay: calc(4 * var(--stagger-delay)); }
+.stagger-container .reveal:nth-child(5) { transition-delay: calc(5 * var(--stagger-delay)); }
+.stagger-container .reveal:nth-child(6) { transition-delay: calc(6 * var(--stagger-delay)); }
+.stagger-container .reveal:nth-child(7) { transition-delay: calc(7 * var(--stagger-delay)); }
+.stagger-container .reveal:nth-child(8) { transition-delay: calc(8 * var(--stagger-delay)); }
+

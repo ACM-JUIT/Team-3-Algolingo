@@ -10,8 +10,8 @@ app.secret_key = "algolingo_secret_key"
 
 
 @app.route('/')
-def login():
-    return render_template('login.html')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/signup')
@@ -39,10 +39,12 @@ def register():
 
     conn.commit()
 
-    return redirect('/')
+    return redirect('/login')
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login_user():
+    if request.method == 'GET':
+        return render_template('login.html')
 
     email = request.form['email']
     password = request.form['password']
@@ -78,7 +80,7 @@ def login_user():
 def dashboard():
 
     if 'user_id' not in session:
-        return redirect('/')
+        return redirect('/login')
 
     return render_template(
         'dashboard.html',
