@@ -1,13 +1,40 @@
-from flask import Flask, render_template, request, redirect, session
+import os
+from dotenv import load_dotenv
+
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    session,
+    url_for
+)
+
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
+
+from authlib.integrations.flask_client import OAuth
+
 from db import conn, cursor
 
-app = Flask(__name__)
-app.secret_key = "algolingo_secret_key"
+load_dotenv()
 
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
+
+oauth = OAuth(app)
+
+google = oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={
+        "scope": "openid email profile"
+    }
+)
 
 @app.route('/')
 def login():
@@ -72,6 +99,89 @@ def login_user():
             return redirect('/dashboard')
 
     return "Invalid Email or Password"
+
+@app.route("/login/google")
+def google_login():
+    redirect_uri = url_for("google_authorized", _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route("/login/google/authorized")
+def google_authorized():
+
+    conn.rollback()   # Reset any aborted transaction
+
+    token = google.authorize_access_token()
+
+    user_info = token["userinfo"]
+
+    email = user_info["email"]
+
+    username = user_info["name"]
+    google_id = user_info["sub"]
+    picture = user_info.get("picture")
+
+    # Check whether the user already exists
+    cursor.execute(
+        """
+        SELECT id, username
+        FROM users
+        WHERE email=%s
+        """,
+        (email,)
+    )
+
+    user = cursor.fetchone()
+
+    if user:
+
+        session["user_id"] = user[0]
+        session["username"] = user[1]
+
+    else:
+
+        cursor.execute(
+            """
+            INSERT INTO users
+            (
+                username,
+                email,
+                password_hash,
+                google_id,
+                provider,
+                profile_picture
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                NULL,
+                %s,
+                'google',
+                %s
+            )
+            RETURNING id
+            """,
+            (
+                username,
+                email,
+                google_id,
+                picture
+            )
+        )
+
+        new_user = cursor.fetchone()
+
+        if new_user is None:
+         return "Failed to create Google user."
+
+        user_id = new_user[0]
+
+        conn.commit()
+
+        session["user_id"] = user_id
+        session["username"] = username
+
+    return redirect("/dashboard")
 
 
 @app.route('/dashboard')
