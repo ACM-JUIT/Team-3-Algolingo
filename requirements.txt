@@ -7,3 +7,4 @@ cryptography==49.0.0
 cffi==2.0.0
 pycparser==2.23
 joserfc==1.7.2
+ollama==0.2.0
