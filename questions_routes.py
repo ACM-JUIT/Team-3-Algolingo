@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from db import cursor
+from ollama_service import ollama_service
 
 questions_bp = Blueprint('questions', __name__)
 
@@ -73,3 +74,27 @@ def get_questions():
     except Exception as e:
         print("Database query error:", e)
         return jsonify({"status": "error", "message": "Failed to fetch questions."}), 500
+
+@questions_bp.route('/api/questions/<int:question_id>/ai-explanation', methods=['GET'])
+def get_ai_explanation(question_id):
+    """Get AI-generated explanation for a question"""
+    try:
+        cursor.execute("SELECT question, explanation FROM questions WHERE id = %s", (question_id,))
+        row = cursor.fetchone()
+        
+        if not row:
+            return jsonify({"error": "Question not found"}), 404
+        
+        question, existing_explanation = row
+        # Use Ollama to enhance or generate explanation
+        enhanced_explanation = ollama_service.generate_response(
+            f"Provide a detailed but concise explanation for this programming question:\n\n{question}"
+        )
+        
+        return jsonify({
+            "status": "success",
+            "original_explanation": existing_explanation,
+            "ai_explanation": enhanced_explanation
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
