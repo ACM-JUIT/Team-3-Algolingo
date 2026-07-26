@@ -3,94 +3,514 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALGOLINGO Dashboard</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <title>ALGOLINGO - Retro Coding Dungeon</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Retro Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
-
 <body>
 
-<div class="dashboard-container">
-
-    <header class="top-bar">
-
-        <div>
-            <h1>Welcome {{ username }}</h1>
-            <p>Ready for today's coding adventure?</p>
+    <!-- Main Game Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="logo">ALGO_QUEST</a>
+            <nav class="nav-links game-nav">
+                <a href="#" class="nav-tab active" data-tab="quest">Quests</a>
+                <a href="#" class="nav-tab" data-tab="bestiary">Bestiary</a>
+                <a href="#" class="nav-tab" data-tab="equipment">Equipment</a>
+                <a href="#" class="nav-tab" data-tab="lore">Lore</a>
+            </nav>
+            <div class="header-right">
+                <!-- Gold GP Display -->
+                <div class="gold-display">
+                    <span class="gold-icon">🪙</span>
+                    <span id="gold-amount">1,250</span> GP
+                </div>
+                <!-- Profile / Settings Buttons -->
+                <a href="/logout" class="btn btn-stone btn-sm logout-btn">LOGOUT</a>
+            </div>
         </div>
-
-        <a href="/logout" class="logout-btn">
-            Logout
-        </a>
-
     </header>
 
-    <section class="stats-section">
+    <!-- Main Dashboard Container -->
+    <div class="game-container">
+        
+        <!-- Left Side Panel: Hero Status Card -->
+        <aside class="sidebar-panel">
+            <div class="hero-card inner-window">
+                <div class="viewport-content hero-card-body">
+                    <!-- Avatar Frame -->
+                    <div class="avatar-frame">
+                        <!-- Pure CSS rendering of a pixel-art hero if image fails, otherwise displays nice thumbnail -->
+                        <div class="pixel-avatar" style="background-image: url('/static/items_spritesheet.png'); background-position: -470px -365px;"></div>
+                    </div>
+                    
+                    <!-- Username & Class -->
+                    <div class="hero-info">
+                        <h2 class="hero-name" id="hero-name">{{ username }}</h2>
+                        <span class="hero-class" id="hero-level-label">Level 1 Coder</span>
+                    </div>
 
-        <div class="stat-card">
-            <h3>Level</h3>
-            <p>1</p>
-        </div>
+                    <!-- HP Progress Bar -->
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-header">
+                            <span class="stat-label">HP</span>
+                            <span class="stat-values" id="hp-text">100/100</span>
+                        </div>
+                        <div class="hp-bar" id="hp-progress-bar">
+                            <div class="hp-segment filled bg-green" style="width: 100%"></div>
+                        </div>
+                    </div>
 
-        <div class="stat-card">
-            <h3>XP</h3>
-            <p>0</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Streak</h3>
-            <p>0 Days</p>
-        </div>
-
-    </section>
-
-    <section>
-
-        <h2 class="section-title">
-            Choose Your Tower
-        </h2>
-
-        <div class="tower-grid">
-
-            <div class="tower-card">
-                <h3>🐍 Python Tower</h3>
-                <p>Variables, Loops, Functions & More</p>
+                    <!-- XP Progress Bar -->
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-header">
+                            <span class="stat-label">XP</span>
+                            <span class="stat-values" id="xp-text">0/1000</span>
+                        </div>
+                        <div class="hp-bar border-gold" id="xp-progress-bar">
+                            <div class="hp-segment filled bg-gold" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="tower-card">
-                <h3>☕ Java Tower</h3>
-                <p>OOP, Classes, Objects & Projects</p>
-            </div>
+            <!-- Tab Switchers inside sidebar (Status, Inventory, Skills, Map, Log) -->
+            <nav class="sidebar-nav">
+                <button class="sidebar-btn active" data-tab-nav="quests-nav">
+                    <span class="icon">🛡️</span> Status
+                </button>
+                <button class="sidebar-btn" data-tab-nav="inventory-nav">
+                    <span class="icon">🎒</span> Inventory
+                </button>
+                <button class="sidebar-btn" data-tab-nav="skills-nav">
+                    <span class="icon">⚡</span> Skills
+                </button>
+                <button class="sidebar-btn" data-tab-nav="map-nav">
+                    <span class="icon">🗺️</span> Map
+                </button>
+                <button class="sidebar-btn" data-tab-nav="log-nav">
+                    <span class="icon">📜</span> Log
+                </button>
+            </nav>
 
-            <div class="tower-card">
-                <h3>⚙️ C++ Tower</h3>
-                <p>Programming Fundamentals & STL</p>
-            </div>
+            <!-- Upgrade Gear Quick Button -->
+            <button class="btn btn-primary upgrade-btn" id="quick-upgrade-btn">UPGRADE GEAR</button>
+        </aside>
 
-            <div class="tower-card">
-                <h3>🌳 DSA Tower</h3>
-                <p>Arrays, Trees, Graphs & Algorithms</p>
-            </div>
+        <!-- Right Side Panel: Workspace Area -->
+        <main class="main-content-panel">
 
+            <!-- Active View: Quests (default) -->
+            <section id="tab-content-quest" class="tab-pane active">
+                
+                <!-- Floor Info -->
+                <div class="floor-header">
+                    <div class="floor-title">
+                        <span class="location-badge">Floor 01</span>
+                        <h2 id="current-quest-title">Variables & Data Types</h2>
+                    </div>
+                    <div class="location-text">
+                        Current Loc: <span class="highlight-green">Dungeon Hub</span>
+                    </div>
+                </div>
+
+                <!-- Dungeon Isometric Viewport -->
+                <div class="dungeon-viewport inner-window">
+                    <div class="viewport-content viewport-relative">
+                        <!-- Dungeon Map Image -->
+                        <div class="dungeon-bg" style="background-image: url('/static/tower.png');"></div>
+                        
+                        <!-- Knight Character -->
+                        <div class="knight-sprite-container" id="player-knight">
+                            <div class="knight-sprite" style="background-image: url('/static/items_spritesheet.png');"></div>
+                            <div class="action-tooltip" id="space-tooltip">Ready for Battle</div>
+                        </div>
+
+                        <!-- Easy Monster: Slime -->
+                        <div class="monster-sprite-container target-monster" id="monster-easy" data-difficulty="easy">
+                            <div class="monster-sprite green-slime-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                            <div class="monster-name-tag border-green">
+                                <span class="monster-tag-diff text-green">EASY</span>
+                                <span class="monster-tag-hp" id="monster-easy-hp">100/100 HP</span>
+                            </div>
+                        </div>
+
+                        <!-- Medium Monster: Skeleton -->
+                        <div class="monster-sprite-container target-monster" id="monster-medium" data-difficulty="medium">
+                            <div class="monster-sprite skeleton-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                            <div class="monster-name-tag border-gold">
+                                <span class="monster-tag-diff text-gold">MEDIUM</span>
+                                <span class="monster-tag-hp" id="monster-medium-hp">150/150 HP</span>
+                            </div>
+                        </div>
+
+                        <!-- Hard Monster: Beholder -->
+                        <div class="monster-sprite-container target-monster" id="monster-hard" data-difficulty="hard">
+                            <div class="monster-sprite beholder-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                            <div class="monster-name-tag border-red">
+                                <span class="monster-tag-diff text-red">HARD</span>
+                                <span class="monster-tag-hp" id="monster-hard-hp">200/200 HP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Widgets Panel -->
+                <div class="bottom-widgets-grid">
+                    
+                    <!-- Quick Slots Component -->
+                    <div class="widget-box inner-window">
+                        <div class="viewport-content widget-padding">
+                            <h3 class="widget-title">Quick Slots</h3>
+                            <div class="quick-slots-container">
+                                <!-- Slot 1: HP Potion -->
+                                <div class="slot-cell item-potion" id="slot-potion">
+                                    <div class="slot-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -20px -25px;"></div>
+                                    <span class="slot-count" id="potion-count">x5</span>
+                                    <span class="slot-label">USE (HEAL)</span>
+                                </div>
+                                <!-- Slot 2: Sword of Logic -->
+                                <div class="slot-cell equipped" id="slot-weapon">
+                                    <div class="slot-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -470px -245px;"></div>
+                                    <span class="slot-count">x1</span>
+                                    <span class="slot-label">EQUIPPED</span>
+                                </div>
+                                <!-- Slot 3: Empty -->
+                                <div class="slot-cell empty">
+                                    <div class="slot-icon"></div>
+                                    <span class="slot-label">EMPTY</span>
+                                </div>
+                                <!-- Slot 4: Empty -->
+                                <div class="slot-cell empty">
+                                    <div class="slot-icon"></div>
+                                    <span class="slot-label">EMPTY</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quest Selector Component -->
+                    <div class="widget-box inner-window">
+                        <div class="viewport-content widget-padding">
+                            <h3 class="widget-title">Select Quest Chapter</h3>
+                            <select id="chapter-select" class="retro-dropdown">
+    <!-- 🐍 PYTHON TOPICS -->
+<optgroup label=" PYTHON">
+    <option value="Input and Output in Python">1. Input and Output in Python</option>
+    <option value="Variables & Data Types in Python">2. Variables & Data Types in Python</option>
+    <option value="Operators in Python">3. Operators in Python</option>
+    <option value="Conditional Statements in Python">4. Conditional Statements in Python</option>
+    <option value="Loops in Python">5. Loops in Python</option>
+    <option value="Lists in Python">6. Lists in Python</option>
+    <option value="Tuples in Python">7. Tuples in Python</option>
+    <option value="Dictionaries in Python">8. Dictionaries in Python</option>
+    <option value="Sets in Python">9. Sets in Python</option>
+    <option value="Strings in Python">10. Strings in Python</option>
+</optgroup>
+
+<!-- ☕ JAVA TOPICS -->
+<optgroup label="JAVA">
+    <option value="Java Introduction">11. Java Introduction</option>
+    <option value="Java Data Types & Variables">12. Java Data Types and Variables</option>
+    <option value="Java Operators">13. Java Operators</option>
+    <option value="Java Control Statements">14. Java Control Statements</option>
+    <option value="Java Methods">15. Java Methods</option>
+    <option value="Java Arrays & Strings">16. Java Arrays & Strings</option>
+    <option value="Java OOP">17. Java OOP</option>
+    <option value="Java Exception Handling">18. Java Exception Handling</option>
+    <option value="Java Collections">19. Java Collections</option>
+    <option value="Java File I/O">20. Java File I/O</option>
+</optgroup>
+
+<!-- ⚡ C++ TOPICS -->
+<optgroup label="C++">
+    <option value="Data Types & Operators">21. Data Types & Operators</option>
+    <option value="Control Structures">22. Control Structures</option>
+    <option value="Functions & Recursion">23. Functions & Recursion</option>
+    <option value="Arrays, Strings & Pointers">24. Arrays, Strings & Pointers</option>
+    <option value="Object-Oriented Programming">25. Object-Oriented Programming</option>
+    <option value="Constructors & Overloading">26. Constructors & Overloading</option>
+    <option value="Templates">27. Templates</option>
+    <option value="Exception Handling">28. Exception Handling</option>
+    <option value="STL">29. STL</option>
+    <option value="File Handling">30. File Handling</option>
+</optgroup>
+</select>
+                            
+                            <div class="quest-progress-summary">
+                                <div class="quest-prog-item">
+                                    <span>Floor Progress:</span>
+                                    <span class="highlight-green" id="floor-progress-text">0 / 3 Monsters Defeated</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adventure Terminal Console -->
+                    <div class="widget-box inner-window">
+                        <div class="viewport-content widget-padding terminal-bg">
+                            <h3 class="widget-title text-green">Adventure Log</h3>
+                            <div class="terminal-body" id="adventure-log">
+                                <div class="terminal-line">> Welcome to ALGOLINGO Dungeon, Hunter!</div>
+                                <div class="terminal-line">> You entered Floor 01.</div>
+                                <div class="terminal-line">> Sword of Logic equipped.</div>
+                                <div class="terminal-line">> Ready for quest _</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Active View: Bestiary -->
+            <section id="tab-content-bestiary" class="tab-pane">
+                <div class="inner-window bestiary-info-box">
+                    <div class="viewport-content widget-padding">
+                        <h2 class="section-title text-purple">Dungeon Bestiary</h2>
+                        <p class="section-desc">Study the manifestations of programming errors and variables to successfully strike them down.</p>
+                        
+                        <div class="bestiary-grid">
+                            <!-- Slime -->
+                            <div class="bestiary-card inner-window">
+                                <div class="viewport-content widget-padding">
+                                    <div class="bestiary-sprite-header bg-green">
+                                        <div class="sprite-crop green-slime-sprite" style="background-image: url('/static/monsters_spritesheet.png'); transform: scale(1.5);"></div>
+                                    </div>
+                                    <h3>THE SLIME OF SORTING</h3>
+                                    <p class="monster-desc">Guardians of easy concepts. They split when attacked but dissolve quickly when hit with direct definitions.</p>
+                                    <div class="monster-meta">
+                                        <span>DIFFICULTY: <strong class="text-green">EASY</strong></span>
+                                        <span>HP: 100</span>
+                                        <span>REWARD: +50 XP, +20 GP</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Skeleton -->
+                            <div class="bestiary-card inner-window">
+                                <div class="viewport-content widget-padding">
+                                    <div class="bestiary-sprite-header bg-purple">
+                                        <div class="sprite-crop skeleton-sprite" style="background-image: url('/static/monsters_spritesheet.png'); transform: scale(1.5);"></div>
+                                    </div>
+                                    <h3>SKELETON OF STACKS</h3>
+                                    <p class="monster-desc">A rigid undead guardian that operates strictly under Last-In-First-Out logic. Strike when it's overloaded.</p>
+                                    <div class="monster-meta">
+                                        <span>DIFFICULTY: <strong class="text-gold">MEDIUM</strong></span>
+                                        <span>HP: 150</span>
+                                        <span>REWARD: +100 XP, +50 GP</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Beholder -->
+                            <div class="bestiary-card inner-window">
+                                <div class="viewport-content widget-padding">
+                                    <div class="bestiary-sprite-header bg-red">
+                                        <div class="sprite-crop beholder-sprite" style="background-image: url('/static/monsters_spritesheet.png'); transform: scale(1.5);"></div>
+                                    </div>
+                                    <h3>BEHOLDER OF BINARY</h3>
+                                    <p class="monster-desc">An ancient aberration that divides paths and logic in trees. Extremely powerful logic required to break its armor.</p>
+                                    <div class="monster-meta">
+                                        <span>DIFFICULTY: <strong class="text-red">HARD</strong></span>
+                                        <span>HP: 200</span>
+                                        <span>REWARD: +200 XP, +100 GP</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Active View: Equipment & Inventory Shop -->
+            <section id="tab-content-equipment" class="tab-pane">
+                <div class="inner-window shop-box">
+                    <div class="viewport-content widget-padding">
+                        <h2 class="section-title text-gold">EQUIPMENT & MERCHANT VAULT</h2>
+                        <p class="section-desc">Spend your hard-earned gold coins (GP) on items to recover or gain buffs during your journey.</p>
+                        
+                        <div class="shop-grid">
+                            
+                            <!-- HP Potion Item -->
+                            <div class="shop-card inner-window">
+                                <div class="viewport-content widget-padding shop-item-body">
+                                    <div class="shop-item-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -20px -25px;"></div>
+                                    <h3>HP POTION</h3>
+                                    <p>Restores 50 HP points immediately. Use it when low in health during/outside battles.</p>
+                                    <div class="shop-buy-action">
+                                        <span class="price-tag">🪙 50 GP</span>
+                                        <button class="btn btn-secondary buy-potion-btn">BUY POTION</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Logic Wand Item (Locked) -->
+                            <div class="shop-card inner-window locked-item">
+                                <div class="viewport-content widget-padding shop-item-body">
+                                    <div class="shop-item-icon locked-icon-cell">🔒</div>
+                                    <h3>LOGIC WAND</h3>
+                                    <p>Increases damage dealt to Medium/Hard monsters by 20%. Requires Level 5 to purchase.</p>
+                                    <div class="shop-buy-action">
+                                        <span class="price-tag text-muted">🪙 500 GP</span>
+                                        <button class="btn btn-stone btn-disabled" disabled>LOCKED</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Master Key Item (Locked) -->
+                            <div class="shop-card inner-window locked-item">
+                                <div class="viewport-content widget-padding shop-item-body">
+                                    <div class="shop-item-icon locked-icon-cell">🔒</div>
+                                    <h3>MASTER KEY</h3>
+                                    <p>Unlocks higher floors immediately. Requires Level 10 to purchase.</p>
+                                    <div class="shop-buy-action">
+                                        <span class="price-tag text-muted">🪙 1,000 GP</span>
+                                        <button class="btn btn-stone btn-disabled" disabled>LOCKED</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Active View: Lore -->
+            <section id="tab-content-lore" class="tab-pane">
+                <div class="inner-window lore-box">
+                    <div class="viewport-content widget-padding">
+                        <h2 class="section-title text-white">Lore & Legend</h2>
+                        <div class="lore-text">
+                            <p>For centuries, the <strong>Python Tower</strong> stood as the ultimate challenge for aspiring programmers. Inside its cold, stone-brick walls reside gatekeepers who test travelers' command of variables, structures, and operators.</p>
+                            <p>To ascend, a Hero Coder must defeat these manifestation beasts. When the logic is faulty, the beasts strike back, draining the hero's energy (HP). Only true commands can defeat the beasts, allowing entry to higher floors.</p>
+                            <p>Do you have what it takes to optimize your logic and reach the summit?</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- Retro Combat Overlay Panel (Battle Modal) -->
+    <div class="battle-overlay" id="battle-modal">
+        <div class="battle-window inner-window animate-shake-target">
+            <div class="viewport-content viewport-battle-bg">
+                
+                <!-- Battle Screen Header -->
+                <div class="battle-header">
+                    <span class="battle-floor-badge" id="battle-header-diff">EASY BATTLE</span>
+                    <h2 id="battle-header-monster">SLIME OF VARIABLES</h2>
+                </div>
+
+                <!-- Battle Viewport (Showdown) -->
+                <div class="battle-arena">
+                    <!-- Left: Knight Fighter -->
+                    <div class="arena-fighter player-fighter" id="arena-player">
+                        <div class="arena-sprite-container">
+                            <div class="knight-sprite animated-breathing" style="background-image: url('/static/items_spritesheet.png');"></div>
+                            <div class="damage-number" id="player-dmg-popup">-15</div>
+                            <div class="slash-overlay" id="player-slash"></div>
+                        </div>
+                        <span class="fighter-label">HERO CODER</span>
+                    </div>
+
+                    <!-- Center: VS Splash -->
+                    <div class="arena-vs text-gold">VS</div>
+
+                    <!-- Right: Monster Fighter -->
+                    <div class="arena-fighter monster-fighter" id="arena-monster">
+                        <div class="arena-sprite-container">
+                            <!-- Dynamically loaded monster sprite classes -->
+                            <div class="monster-sprite animated-breathing" id="arena-monster-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                            <div class="damage-number" id="monster-dmg-popup">-25</div>
+                            <div class="slash-overlay" id="monster-slash"></div>
+                        </div>
+                        <span class="fighter-label" id="arena-monster-label">SLIME</span>
+                        
+                        <!-- Monster Health Bar inside Arena -->
+                        <div class="arena-monster-hp">
+                            <div class="hp-bar border-gold">
+                                <div class="hp-segment filled bg-gold" id="arena-monster-hp-fill" style="width: 100%"></div>
+                            </div>
+                            <span id="arena-monster-hp-text">100/100 HP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Area -->
+                <div class="battle-question-box inner-window">
+                    <div class="viewport-content widget-padding bg-black">
+                        <!-- Q Title & Progress -->
+                        <div class="question-header">
+                            <span class="question-index" id="battle-q-num">Question 1 of 7</span>
+                            <span class="question-topic highlight-green" id="battle-q-topic">VARIABLES</span>
+                        </div>
+                        
+                        <!-- Question Text -->
+                        <div class="question-body" id="battle-q-text">
+                            Which data type stores whole numbers?
+                        </div>
+
+                        <!-- Code Block (rendered if present) -->
+                        <div class="question-code-block" id="battle-code-container">
+                            <pre><code id="battle-code-content">x = 10
+print(type(x))</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Controls Panel (Answers) -->
+                <div class="battle-input-panel">
+                    <!-- MCQ layout (4 buttons) -->
+                    <div class="mcq-choices-grid" id="battle-mcq-choices">
+                        <button class="btn btn-stone choice-btn" data-choice="A">A) float</button>
+                        <button class="btn btn-stone choice-btn" data-choice="B">B) int</button>
+                        <button class="btn btn-stone choice-btn" data-choice="C">C) str</button>
+                        <button class="btn btn-stone choice-btn" data-choice="D">D) bool</button>
+                    </div>
+
+                    <!-- Fill-in-the-blank layout (text input) -->
+                    <div class="fitb-input-container hidden" id="battle-fitb-input-container">
+                        <input type="text" id="battle-fitb-input" class="retro-input" placeholder="Type your answer here..." autocomplete="off">
+                        <button class="btn btn-primary" id="battle-fitb-submit">SUBMIT STRIKE</button>
+                    </div>
+                </div>
+
+                <!-- Battle Feedback Status bar -->
+                <div class="battle-status-bar terminal-bg">
+                    <div class="terminal-line" id="battle-status-text">> Choose a strike option to attack!</div>
+                </div>
+
+                <!-- Battle Exit Button (Disabled by default, enabled on victory/defeat) -->
+                <div class="battle-footer">
+                    <button class="btn btn-stone hidden" id="battle-close-btn">RETURN TO MAP</button>
+                </div>
+
+            </div>
         </div>
+    </div>
 
-    </section>
+    <!-- Alert / Level up / Victory Popup Overlay -->
+    <div class="game-alert-overlay" id="game-alert">
+        <div class="alert-window inner-window animate-bounce">
+            <div class="viewport-content widget-padding text-center">
+                <h1 class="alert-title text-gold" id="alert-title">LEVEL UP!</h1>
+                <p class="alert-message" id="alert-msg">Congratulations! You reached Level 2 Coder!</p>
+                <button class="btn btn-primary" id="alert-ok-btn">OK</button>
+            </div>
+        </div>
+    </div>
 
-    <section class="recent-activity">
-
-        <h2>Recent Activity</h2>
-
-        <ul>
-            <li>No activity yet.</li>
-            <li>Start your first tower adventure.</li>
-        </ul>
-
-    </section>
-
-</div>
-
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-
+    <!-- Core Javascript Data & Logic -->
+    
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

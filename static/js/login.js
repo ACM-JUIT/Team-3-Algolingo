@@ -52,19 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Intercept submit state pipeline processes
     loginForm.addEventListener('submit', (e) => {
-
-    clearBanner();
-
-    let isFormValid = true;
-
-    // validations
-
-    if (!isFormValid) {
         e.preventDefault();
-        return;
-    }
+        clearBanner();
 
-
+        let isFormValid = true;
 
         // Validation - Email Checks
         if (!emailInput.value.trim()) {
@@ -93,9 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 displayBanner('Welcome back, Hero! Loading your Quest panel...', 'success');
-                // You can safely redirect or handle session assignment pipelines here:
-                // window.location.href = 'dashboard.html';
-            }, 1200);
+                setTimeout(() => {
+                    loginForm.submit(); // Actually submit to /login
+                }, 1200);
+            }, 800);
         } else {
             displayBanner('Please correct the highlighted errors above before proceeding.', 'error');
         }

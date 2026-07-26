@@ -109,11 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 displayBanner('Account created successfully! Preparing your custom workspace...', 'success');
-                signupForm.reset();
                 setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1500);
-            }, 1200);
+                    signupForm.submit(); // Actually submit to /register
+                }, 1200);
+            }, 800);
         } else {
             displayBanner('Please resolve the errors highlighted below to initialize registration.', 'error');
         }
