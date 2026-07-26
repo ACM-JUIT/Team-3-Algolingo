@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from questions_routes import questions_bp
+from ollama_service import OllamaService
 
 
 from flask import Flask, render_template, request, redirect, session, jsonify,url_for
@@ -38,6 +39,10 @@ def index():
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
+
+ollama_service = OllamaService(
+    base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+)
 
 
 @app.route('/register', methods=['POST'])
