@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gold: 1250,
         hp: 100,
         completed_questions: [],
-        current_quest: "variables", // Active chapter topic
+        current_quest: "Java Introduction", // Default active topic
         potions: 5
     };
 
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==================== DOM ELEMENTS ====================
-    // Sidebar Elements
     const heroName = document.getElementById('hero-name');
     const heroLevelLabel = document.getElementById('hero-level-label');
     const hpText = document.getElementById('hp-text');
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const goldAmount = document.getElementById('gold-amount');
     const sidebarNavBtns = document.querySelectorAll('.sidebar-btn');
 
-    // Tab Contents & Header Navigation
     const navTabs = document.querySelectorAll('.nav-tab');
     const tabPanes = document.querySelectorAll('.tab-pane');
     const chapterSelect = document.getElementById('chapter-select');
@@ -40,21 +38,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentQuestTitle = document.getElementById('current-quest-title');
     const adventureLog = document.getElementById('adventure-log');
 
-    // Potion slots & Shop
     const slotPotion = document.getElementById('slot-potion');
     const potionCount = document.getElementById('potion-count');
     const quickUpgradeBtn = document.getElementById('quick-upgrade-btn');
     const buyPotionBtn = document.querySelector('.buy-potion-btn');
 
-    // Monsters on Floor
-    const monsterEasy = document.getElementById('monster-easy');
-    const monsterMedium = document.getElementById('monster-medium');
-    const monsterHard = document.getElementById('monster-hard');
     const targetMonsters = document.querySelectorAll('.target-monster');
 
     // Battle Modal Elements
     const battleModal = document.getElementById('battle-modal');
-    const battleWindow = battleModal.querySelector('.battle-window');
+    const battleWindow = battleModal ? battleModal.querySelector('.battle-window') : null;
     const battleHeaderDiff = document.getElementById('battle-header-diff');
     const battleHeaderMonster = document.getElementById('battle-header-monster');
     const arenaMonsterLabel = document.getElementById('arena-monster-label');
@@ -76,13 +69,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const battleStatusText = document.getElementById('battle-status-text');
     const battleCloseBtn = document.getElementById('battle-close-btn');
 
-    // Popups
     const gameAlert = document.getElementById('game-alert');
     const alertTitle = document.getElementById('alert-title');
     const alertMsg = document.getElementById('alert-msg');
     const alertOkBtn = document.getElementById('alert-ok-btn');
 
-    // ==================== CORE INITIALIZATION ====================
+    // Helper: Get Language from selected dropdown optgroup
+    // Helper: Safely identify selected language from dropdown optgroup
+    function getSelectedLanguage() {
+        if (!chapterSelect) return "";
+        const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
+        if (selectedOption && selectedOption.parentElement && selectedOption.parentElement.tagName === 'OPTGROUP') {
+            const label = selectedOption.parentElement.label.toLowerCase();
+            if (label.includes('python')) return 'Python';
+            if (label.includes('java') && !label.includes('script')) return 'Java';
+            if (label.includes('c++') || label.includes('cpp') || label.includes('c plus plus')) return 'C++';
+        }
+        return "";
+    }
+
+    async function fetchQuestionsFromDB(topic, difficulty) {
+        try {
+            // Clean leading numbers and decode HTML entities
+            let cleanTopic = topic.replace(/^\d+\.\s*/, '').trim().replace(/&amp;/g, '&');
+            const language = getSelectedLanguage();
+            
+            // Build query params using URLSearchParams to properly escape special chars like C++
+            const params = new URLSearchParams();
+            params.append('topic', cleanTopic);
+            params.append('difficulty', difficulty);
+            if (language) {
+                params.append('language', language);
+            }
+
+            const url = `/api/questions?${params.toString()}`;
+            console.log(`[API Fetching] ${url}`);
+
+            const res = await fetch(url);
+            const result = await res.json();
+            
+            if (result.status === 'success') {
+                return result.data;
+            }
+        } catch (err) {
+            console.error("Failed to fetch questions from API:", err);
+        }
+        return [];
+    }
+
     async function loadGameState() {
         try {
             const response = await fetch('/api/state');
@@ -94,49 +128,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     playerState.gold = data.gold || 1250;
                     playerState.hp = data.hp !== undefined ? data.hp : 100;
                     
-                    // Parse completed questions
                     if (data.completed_questions) {
-                        playerState.completed_questions = data.completed_questions.split(',').filter(x => x.trim() !== '');
+                        playerState.completed_questions = data.completed_questions.split(',').map(x => x.trim()).filter(x => x !== '');
                     } else {
                         playerState.completed_questions = [];
                     }
                     
-                    // Potion count stored in session/localStorage
                     playerState.potions = parseInt(localStorage.getItem('potions') || "5");
-                    playerState.current_quest = localStorage.getItem('current_quest') || "variables";
+                    playerState.current_quest = localStorage.getItem('current_quest') || (chapterSelect ? chapterSelect.value : "Java Introduction");
                 }
             }
         } catch (err) {
             console.warn("Could not fetch state from API, using LocalStorage backup.", err);
-            // Load from LocalStorage fallback
             const localState = localStorage.getItem('algo_quest_player_state');
             if (localState) {
                 playerState = JSON.parse(localState);
             }
         }
         
-        // Sync inputs
-        chapterSelect.value = playerState.current_quest;
+        if (chapterSelect) {
+            chapterSelect.value = playerState.current_quest;
+        }
         logMessage("> Syncing adventurer files from database...");
-        logMessage(`> Logged in as ${heroName.textContent}. HP restored/synced.`);
+        if (heroName) logMessage(`> Logged in as ${heroName.textContent}. HP restored/synced.`);
         
-        renderUI();
-        updateMonsterStatus();
+        await renderUI();
+        await updateMonsterStatus();
     }
 
     async function saveGameState() {
-        // Save to LocalStorage
         localStorage.setItem('algo_quest_player_state', JSON.stringify(playerState));
         localStorage.setItem('potions', playerState.potions.toString());
         localStorage.setItem('current_quest', playerState.current_quest);
 
-        // Save to Database via API
         try {
             await fetch('/api/state', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     level: playerState.level,
                     xp: playerState.xp,
@@ -150,48 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ==================== RENDERING & UI UPDATES ====================
-    function renderUI() {
-        // Gold GP
-        goldAmount.textContent = playerState.gold.toLocaleString();
-
-        // Level
-        heroLevelLabel.textContent = `Level ${playerState.level} Coder`;
-
-        // HP Bar
-        hpText.textContent = `${playerState.hp}/100`;
-        const hpPercent = Math.max(0, Math.min(100, playerState.hp));
-        hpProgressBar.querySelector('.hp-segment').style.width = `${hpPercent}%`;
-        
-        // HP Bar Color adjust
-        const hpSegment = hpProgressBar.querySelector('.hp-segment');
-        if (hpPercent > 50) {
-            hpSegment.className = "hp-segment filled bg-green";
-        } else if (hpPercent > 20) {
-            hpSegment.className = "hp-segment filled bg-gold";
-        } else {
-            hpSegment.className = "hp-segment filled bg-red";
-        }
-
-        // XP Bar
-        const xpRequired = playerState.level * 1000;
-        xpText.textContent = `${playerState.xp}/${xpRequired}`;
-        const xpPercent = Math.max(0, Math.min(100, (playerState.xp / xpRequired) * 100));
-        xpProgressBar.querySelector('.hp-segment').style.width = `${xpPercent}%`;
-
-        // Potion quick slot count
-        potionCount.textContent = `x${playerState.potions}`;
-
-        // Select active topic header
-        const activeTopicName = chapterSelect.options[chapterSelect.selectedIndex].text.substring(3);
-        currentQuestTitle.textContent = activeTopicName;
-
-        // Floor progress summary text
-        const floorDefeats = getFloorDefeatsCount(playerState.current_quest);
-        floorProgressText.textContent = `${floorDefeats} / 3 Monsters Defeated`;
-    }
-
     function logMessage(text, type = "standard") {
+        if (!adventureLog) return;
         const line = document.createElement('div');
         line.className = `terminal-line ${type}`;
         line.textContent = text;
@@ -199,126 +187,106 @@ document.addEventListener('DOMContentLoaded', () => {
         adventureLog.scrollTop = adventureLog.scrollHeight;
     }
 
-    function getFloorDefeatsCount(topic) {
+    async function getFloorDefeatsCount(topic) {
         let count = 0;
         const difficulties = ['easy', 'medium', 'hard'];
-        difficulties.forEach(diff => {
-            const diffQuestions = QUESTIONS.filter(q => q.topic === topic && q.difficulty === diff);
-            const completedDiffQuestions = diffQuestions.filter(q => playerState.completed_questions.includes(q.id));
+        for (const diff of difficulties) {
+            const diffQuestions = await fetchQuestionsFromDB(topic, diff);
+            const completedDiffQuestions = diffQuestions.filter(q => playerState.completed_questions.includes(q.id.toString()));
             if (diffQuestions.length > 0 && completedDiffQuestions.length === diffQuestions.length) {
                 count++;
             }
-        });
+        }
         return count;
     }
 
-    function updateMonsterStatus() {
-        const topic = playerState.current_quest;
+    async function updateMonsterStatus() {
+        const rawTopic = chapterSelect ? chapterSelect.options[chapterSelect.selectedIndex].value : playerState.current_quest;
+        const topic = rawTopic.replace(/^\d+\.\s*/, '').trim();
         const difficulties = ['easy', 'medium', 'hard'];
         
-        difficulties.forEach(diff => {
-            const diffQuestions = QUESTIONS.filter(q => q.topic === topic && q.difficulty === diff);
-            const completedDiffQuestions = diffQuestions.filter(q => playerState.completed_questions.includes(q.id));
+        for (const diff of difficulties) {
+            const diffQuestions = await fetchQuestionsFromDB(topic, diff);
+            const completedDiffQuestions = diffQuestions.filter(q => playerState.completed_questions.includes(q.id.toString()));
             const monsterContainer = document.getElementById(`monster-${diff}`);
             const hpLabel = document.getElementById(`monster-${diff}-hp`);
             
             let maxHp = diff === 'easy' ? 100 : (diff === 'medium' ? 150 : 200);
             
             if (diffQuestions.length === 0) {
-                monsterContainer.classList.add('hidden');
-                return;
-            } else {
+                if (monsterContainer) {
+                    monsterContainer.classList.remove('hidden');
+                    monsterContainer.style.opacity = '1';
+                }
+                if (hpLabel) hpLabel.textContent = `${maxHp}/${maxHp} HP`;
+                continue;
+            } else if (monsterContainer) {
                 monsterContainer.classList.remove('hidden');
             }
 
             let unsolvedCount = diffQuestions.length - completedDiffQuestions.length;
             let currentHp = Math.ceil((unsolvedCount / diffQuestions.length) * maxHp);
-            hpLabel.textContent = `${currentHp}/${maxHp} HP`;
+            if (hpLabel) hpLabel.textContent = `${currentHp}/${maxHp} HP`;
 
-            if (currentHp === 0) {
+            if (currentHp === 0 && monsterContainer) {
                 monsterContainer.style.opacity = '0.35';
-                monsterContainer.querySelector('.monster-name-tag').style.borderColor = '#444';
-                hpLabel.textContent = "SLAYED";
-                hpLabel.style.color = '#777';
-            } else {
-                monsterContainer.style.opacity = '1';
-                hpLabel.style.color = '#fff';
-                // Reset tag border colors
                 const tag = monsterContainer.querySelector('.monster-name-tag');
-                if (diff === 'easy') tag.className = 'monster-name-tag border-green';
-                if (diff === 'medium') tag.className = 'monster-name-tag border-gold';
-                if (diff === 'hard') tag.className = 'monster-name-tag border-red';
+                if (tag) tag.style.borderColor = '#444';
+                if (hpLabel) {
+                    hpLabel.textContent = "SLAYED";
+                    hpLabel.style.color = '#777';
+                }
+            } else if (monsterContainer) {
+                monsterContainer.style.opacity = '1';
+                if (hpLabel) hpLabel.style.color = '#fff';
+                const tag = monsterContainer.querySelector('.monster-name-tag');
+                if (tag) {
+                    if (diff === 'easy') tag.className = 'monster-name-tag border-green';
+                    if (diff === 'medium') tag.className = 'monster-name-tag border-gold';
+                    if (diff === 'hard') tag.className = 'monster-name-tag border-red';
+                }
             }
-        });
+        }
     }
 
-    // ==================== NAVIGATION & TAB TOGGLING ====================
-    // Header navigation links switcher
-    navTabs.forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            e.preventDefault();
-            const tabName = tab.getAttribute('data-tab');
-            
-            navTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
+    async function renderUI() {
+        if (goldAmount) goldAmount.textContent = playerState.gold.toLocaleString();
+        if (heroLevelLabel) heroLevelLabel.textContent = `Level ${playerState.level} Coder`;
 
-            tabPanes.forEach(pane => {
-                pane.classList.remove('active');
-                if (pane.id === `tab-content-${tabName}`) {
-                    pane.classList.add('active');
-                }
-            });
-            
-            // Sync with sidebar nav selection
-            sidebarNavBtns.forEach(btn => btn.classList.remove('active'));
-            if (tabName === 'quest') {
-                document.querySelector('[data-tab-nav="quests-nav"]').classList.add('active');
-            } else if (tabName === 'equipment') {
-                document.querySelector('[data-tab-nav="inventory-nav"]').classList.add('active');
+        if (hpText && hpProgressBar) {
+            hpText.textContent = `${playerState.hp}/100`;
+            const hpPercent = Math.max(0, Math.min(100, playerState.hp));
+            const hpSegment = hpProgressBar.querySelector('.hp-segment');
+            if (hpSegment) {
+                hpSegment.style.width = `${hpPercent}%`;
+                if (hpPercent > 50) hpSegment.className = "hp-segment filled bg-green";
+                else if (hpPercent > 20) hpSegment.className = "hp-segment filled bg-gold";
+                else hpSegment.className = "hp-segment filled bg-red";
             }
-        });
-    });
+        }
 
-    // Sidebar navigation buttons switcher
-    sidebarNavBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            sidebarNavBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        if (xpText && xpProgressBar) {
+            const xpRequired = playerState.level * 1000;
+            xpText.textContent = `${playerState.xp}/${xpRequired}`;
+            const xpPercent = Math.max(0, Math.min(100, (playerState.xp / xpRequired) * 100));
+            const xpSegment = xpProgressBar.querySelector('.hp-segment');
+            if (xpSegment) xpSegment.style.width = `${xpPercent}%`;
+        }
 
-            const navType = btn.getAttribute('data-tab-nav');
-            
-            // Map sidebar tabs to main screen views
-            if (navType === 'quests-nav') {
-                // Switch to Quests tab
-                document.querySelector('[data-tab="quest"]').click();
-            } else if (navType === 'inventory-nav') {
-                // Switch to Equipment tab
-                document.querySelector('[data-tab="equipment"]').click();
-            } else if (navType === 'skills-nav') {
-                document.querySelector('[data-tab="lore"]').click(); // Just fallback to lore or show inline alert
-                logMessage("> Skill Tree: Locked. Earn levels to unlock advanced algorithms.");
-                showAlert("Skill Tree", "Syntactic Strike, Loop Whirlwind, and Binary Pierce are unlocked! Level up to rank them up.");
-            } else if (navType === 'map-nav') {
-                showAlert("World Map", "Floor 1: The Foundation [Active]<br>Floor 2: Recursion Crypt [Locked]<br>Floor 3: Dynamic Temple [Locked]");
-            } else if (navType === 'log-nav') {
-                // Scroll straight to log terminal
-                adventureLog.scrollIntoView({ behavior: 'smooth' });
-                logMessage("> Reviewing dungeon adventure files...");
-            }
-        });
-    });
+        if (potionCount) potionCount.textContent = `x${playerState.potions}`;
 
-    // Chapter dropdown select listener
-    chapterSelect.addEventListener('change', () => {
-        playerState.current_quest = chapterSelect.value;
-        logMessage(`> Navigated to Chapter: ${chapterSelect.options[chapterSelect.selectedIndex].text.substring(3)}`);
-        renderUI();
-        updateMonsterStatus();
-        saveGameState();
-    });
+        if (chapterSelect && currentQuestTitle) {
+            const activeTopicName = chapterSelect.options[chapterSelect.selectedIndex].text.replace(/^\d+\.\s*/, '');
+            currentQuestTitle.textContent = activeTopicName;
+        }
+
+        if (floorProgressText) {
+            const floorDefeats = await getFloorDefeatsCount(playerState.current_quest);
+            floorProgressText.textContent = `${floorDefeats} / 3 Monsters Defeated`;
+        }
+    }
 
     // ==================== BATTLE SYSTEM ====================
-    // Engage monster trigger
     targetMonsters.forEach(monster => {
         monster.addEventListener('click', () => {
             const diff = monster.getAttribute('data-difficulty');
@@ -326,14 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function startBattle(topic, diff) {
-        const diffQuestions = QUESTIONS.filter(q => q.topic === topic && q.difficulty === diff);
-        const unsolved = diffQuestions.filter(q => !playerState.completed_questions.includes(q.id));
+    async function startBattle(topic, diff) {
+        const cleanTopic = topic.replace(/^\d+\.\s*/, '').trim();
+        const diffQuestions = await fetchQuestionsFromDB(cleanTopic, diff);
+        const unsolved = diffQuestions.filter(q => !playerState.completed_questions.includes(q.id.toString()));
         
         let maxHp = diff === 'easy' ? 100 : (diff === 'medium' ? 150 : 200);
         let monsterName = diff === 'easy' ? "SLIME OF VARIABLES" : (diff === 'medium' ? "SKELETON OF OPERATORS" : "BEHOLDER OF CONDITIONALS");
         
-        if (unsolved.length === 0) {
+        if (diffQuestions.length > 0 && unsolved.length === 0) {
             logMessage(`> The ${monsterName} has already been defeated on this floor.`, "standard");
             showAlert("Monster Defeated", `The ${monsterName} is already slain! Select a different difficulty or chapter.`);
             return;
@@ -341,42 +310,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (playerState.hp <= 0) {
             logMessage("> You are too weak to fight! Consume an HP Potion first.", "err");
-            showAlert("Low Health", "Your HP is 0! Please drink an HP Potion from your Quick Slots or buy one from the Merchant Vault before engaging in combat.");
+            showAlert("Low Health", "Your HP is 0! Drink an HP Potion from Quick Slots before combat.");
             return;
         }
 
-        // Initialize battle state
         currentBattle.active = true;
         currentBattle.difficulty = diff;
-        currentBattle.questions = unsolved;
+        currentBattle.questions = unsolved.length > 0 ? unsolved : diffQuestions; 
         currentBattle.currentIndex = 0;
         currentBattle.maxMonsterHp = maxHp;
-        currentBattle.monsterHp = Math.ceil((unsolved.length / diffQuestions.length) * maxHp);
+        currentBattle.monsterHp = currentBattle.questions.length > 0 ? Math.ceil((unsolved.length / Math.max(1, diffQuestions.length)) * maxHp) : maxHp;
         
-        // Open Battle Modal
-        battleModal.style.display = 'flex';
-        battleCloseBtn.classList.add('hidden');
-        battleStatusText.textContent = `> Engaged ${monsterName}! Answer questions to deal damage.`;
+        if (currentBattle.monsterHp <= 0) currentBattle.monsterHp = maxHp;
+
+        if (battleModal) battleModal.style.display = 'flex';
         
-        // Adjust Battle Arena Styles
-        battleHeaderDiff.textContent = `${diff.toUpperCase()} CHALLENGE`;
-        battleHeaderMonster.textContent = monsterName;
-        arenaMonsterLabel.textContent = diff === 'easy' ? "SLIME" : (diff === 'medium' ? "SKELETON" : "BEHOLDER");
+        // 🎯 ALWAYS SHOW THE "RETURN TO MAP" BUTTON SO PLAYERS CAN EXIT ANYTIME
+        if (battleCloseBtn) {
+            battleCloseBtn.classList.remove('hidden');
+        }
         
-        // Sprite class setup
-        arenaMonsterSprite.className = "monster-sprite animated-breathing";
-        if (diff === 'easy') arenaMonsterSprite.classList.add('green-slime-sprite');
-        if (diff === 'medium') arenaMonsterSprite.classList.add('skeleton-sprite');
-        if (diff === 'hard') arenaMonsterSprite.classList.add('beholder-sprite');
+        // 🎯 RESET BATTLE STATUS TO ENGAGEMENT PROMPT (Hides previous victory/loss message)
+        if (battleStatusText) {
+            battleStatusText.textContent = `> Engaged ${monsterName}! Answer questions to deal damage.`;
+        }
+        
+        if (battleHeaderDiff) battleHeaderDiff.textContent = `${diff.toUpperCase()} CHALLENGE`;
+        if (battleHeaderMonster) battleHeaderMonster.textContent = monsterName;
+        if (arenaMonsterLabel) arenaMonsterLabel.textContent = diff === 'easy' ? "SLIME" : (diff === 'medium' ? "SKELETON" : "BEHOLDER");
+        
+        if (arenaMonsterSprite) {
+            arenaMonsterSprite.className = "monster-sprite animated-breathing";
+            if (diff === 'easy') arenaMonsterSprite.classList.add('green-slime-sprite');
+            if (diff === 'medium') arenaMonsterSprite.classList.add('skeleton-sprite');
+            if (diff === 'hard') arenaMonsterSprite.classList.add('beholder-sprite');
+        }
 
         updateBattleHp();
         loadBattleQuestion();
     }
 
     function updateBattleHp() {
+        if (!arenaMonsterHpText || !arenaMonsterHpFill) return;
         arenaMonsterHpText.textContent = `${currentBattle.monsterHp}/${currentBattle.maxMonsterHp} HP`;
         const percent = Math.max(0, Math.min(100, (currentBattle.monsterHp / currentBattle.maxMonsterHp) * 100));
         arenaMonsterHpFill.style.width = `${percent}%`;
+    }
+
+    function setupMcqListeners() {
+        if (!battleMcqChoices) return;
+        const choiceBtns = battleMcqChoices.querySelectorAll('.choice-btn');
+        choiceBtns.forEach((btn, index) => {
+            btn.onclick = () => {
+                const letter = String.fromCharCode(65 + index); // A, B, C, D
+                const choiceText = btn.textContent.replace(/^[A-D]\)\s*/, '').trim();
+                submitAnswer(letter, choiceText);
+            };
+        });
     }
 
     function loadBattleQuestion() {
@@ -388,73 +378,112 @@ document.addEventListener('DOMContentLoaded', () => {
         const q = currentBattle.questions[currentBattle.currentIndex];
         currentBattle.currentQuestion = q;
 
-        // Render Q Text
-        battleQNum.textContent = `Question ${currentBattle.currentIndex + 1} of ${currentBattle.questions.length}`;
-        battleQTopic.textContent = q.topic.toUpperCase();
-        battleQText.textContent = q.question;
+        if (battleQNum) battleQNum.textContent = `Question ${currentBattle.currentIndex + 1} of ${currentBattle.questions.length}`;
+        if (battleQTopic) battleQTopic.textContent = (q.topic || playerState.current_quest).toUpperCase();
+        if (battleQText) battleQText.textContent = q.question;
 
-        // Render Code block if any
-        if (q.code) {
-            battleCodeContainer.classList.remove('hidden');
-            battleCodeContent.textContent = q.code;
+        const codeText = q.code_snippet || q.code;
+        if (codeText && codeText.trim() !== '') {
+            if (battleCodeContainer) battleCodeContainer.classList.remove('hidden');
+            if (battleCodeContent) battleCodeContent.textContent = codeText;
         } else {
-            battleCodeContainer.classList.add('hidden');
+            if (battleCodeContainer) battleCodeContainer.classList.add('hidden');
         }
 
-        // Render Input panel
-        if (q.type === 'mcq') {
-            battleMcqChoices.classList.remove('hidden');
-            battleFitbInputContainer.classList.add('hidden');
+        const qType = (q.question_type || q.type || 'mcq').toLowerCase();
+
+        if (qType === 'mcq') {
+            if (battleMcqChoices) battleMcqChoices.classList.remove('hidden');
+            if (battleFitbInputContainer) battleFitbInputContainer.classList.add('hidden');
             
             const choiceBtns = battleMcqChoices.querySelectorAll('.choice-btn');
+            let opts = [];
+            if (q.options) {
+                if (Array.isArray(q.options)) {
+                    opts = q.options;
+                } else {
+                    opts = [q.options.A, q.options.B, q.options.C, q.options.D];
+                }
+            }
+
             for (let i = 0; i < 4; i++) {
-                if (q.options && q.options[i]) {
+                if (opts[i] !== undefined && opts[i] !== null && opts[i] !== '') {
                     choiceBtns[i].classList.remove('hidden');
-                    choiceBtns[i].textContent = `${String.fromCharCode(65 + i)}) ${q.options[i]}`;
+                    choiceBtns[i].textContent = `${String.fromCharCode(65 + i)}) ${opts[i]}`;
                 } else {
                     choiceBtns[i].classList.add('hidden');
                 }
             }
+
+            // Re-bind listeners on options load
+            setupMcqListeners();
+
         } else {
-            battleMcqChoices.classList.add('hidden');
-            battleFitbInputContainer.classList.remove('hidden');
-            battleFitbInput.value = '';
-            battleFitbInput.focus();
+            if (battleMcqChoices) battleMcqChoices.classList.add('hidden');
+            if (battleFitbInputContainer) battleFitbInputContainer.classList.remove('hidden');
+            if (battleFitbInput) {
+                battleFitbInput.value = '';
+                battleFitbInput.focus();
+            }
         }
     }
 
-    // MCQ answer click listener
-    const choiceBtns = battleMcqChoices.querySelectorAll('.choice-btn');
-    choiceBtns.forEach((btn, index) => {
-        btn.addEventListener('click', () => {
-            const letter = String.fromCharCode(65 + index); // A, B, C, D
-            submitAnswer(letter);
+    if (battleFitbSubmit) {
+        battleFitbSubmit.addEventListener('click', () => {
+            if (battleFitbInput) submitAnswer(battleFitbInput.value.trim());
         });
-    });
-
-    // FITB answer submit listener
-    battleFitbSubmit.addEventListener('click', () => {
-        submitAnswer(battleFitbInput.value.trim());
-    });
+    }
     
-    battleFitbInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            submitAnswer(battleFitbInput.value.trim());
-        }
-    });
+    if (battleFitbInput) {
+        battleFitbInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitAnswer(battleFitbInput.value.trim());
+            }
+        });
+    }
 
-    function submitAnswer(userAnswer) {
+    function submitAnswer(userLetter, userText = '') {
         const q = currentBattle.currentQuestion;
-        const isMcq = q.type === 'mcq';
+        if (!q) return;
+
+        const qType = (q.question_type || q.type || 'mcq').toLowerCase();
+        
+        // Retrieve possible answer strings from DB
+        const dbCorrectOpt = (q.correct_option || '').toString().trim().toUpperCase(); // e.g. "C" or "OPTION_C"
+        const dbCorrectAns = (q.correct_answer || '').toString().trim().toUpperCase(); // e.g. "IT PROVIDES THE ENVIRONMENT REQUIRED TO RUN JAVA APPLICATIONS."
+
         let isCorrect = false;
 
-        if (isMcq) {
-            // Compare letters (A, B, C, D)
-            isCorrect = (userAnswer.toUpperCase() === q.answer.toUpperCase());
+        if (qType === 'mcq') {
+            const letterClicked = userLetter.toUpperCase().trim();                     // e.g. "C"
+            const optionKey = `OPTION_${letterClicked}`;                               // e.g. "OPTION_C"
+            const textClicked = userText.toUpperCase().trim();                          // e.g. "IT PROVIDES THE ENVIRONMENT REQUIRED..."
+
+            // Get text from q.options object/array for selected choice
+            let selectedOptText = "";
+            if (q.options) {
+                if (Array.isArray(q.options)) {
+                    const idx = letterClicked.charCodeAt(0) - 65;
+                    selectedOptText = (q.options[idx] || '').toString().toUpperCase().trim();
+                } else {
+                    selectedOptText = (q.options[letterClicked] || q.options[optionKey] || '').toString().toUpperCase().trim();
+                }
+            }
+
+            // Comprehensive matching checks:
+            if (
+                letterClicked === dbCorrectOpt ||                           // "C" === "C"
+                optionKey === dbCorrectOpt ||                               // "OPTION_C" === "OPTION_C"
+                letterClicked === dbCorrectAns ||                           // "C" === "C"
+                (textClicked !== '' && textClicked === dbCorrectAns) ||     // Full text clicked matches DB correct answer
+                (selectedOptText !== '' && selectedOptText === dbCorrectAns) // Option text matches DB correct answer
+            ) {
+                isCorrect = true;
+            }
         } else {
-            // String comparison (case insensitive, trim spaces, remove quotes if user added them)
-            const cleanUser = userAnswer.toLowerCase().replace(/['"]/g, '').trim();
-            const cleanAns = q.answer.toLowerCase().replace(/['"]/g, '').trim();
+            // FITB Check
+            const cleanUser = userLetter.toLowerCase().replace(/['"]/g, '').trim();
+            const cleanAns = dbCorrectAns.toLowerCase().replace(/['"]/g, '').trim();
             isCorrect = (cleanUser === cleanAns);
         }
 
@@ -468,37 +497,36 @@ document.addEventListener('DOMContentLoaded', () => {
     function handlePlayerAttack() {
         const q = currentBattle.currentQuestion;
         
-        // Mark question completed
-        if (!playerState.completed_questions.includes(q.id)) {
-            playerState.completed_questions.push(q.id);
+        const qIdStr = (q.id || '').toString();
+        if (qIdStr && !playerState.completed_questions.includes(qIdStr)) {
+            playerState.completed_questions.push(qIdStr);
         }
 
-        // Calculate damage
-        const diffQuestionsCount = QUESTIONS.filter(qs => qs.topic === q.topic && qs.difficulty === currentBattle.difficulty).length;
+        const diffQuestionsCount = currentBattle.questions.length || 1;
         const dmg = Math.ceil(currentBattle.maxMonsterHp / diffQuestionsCount);
         
         currentBattle.monsterHp = Math.max(0, currentBattle.monsterHp - dmg);
         updateBattleHp();
 
-        // Visual effects (Slash on monster)
         const monsterSlash = document.getElementById('monster-slash');
         const monsterDmgPopup = document.getElementById('monster-dmg-popup');
         
-        monsterSlash.classList.add('active');
-        monsterDmgPopup.textContent = `-${dmg}`;
-        monsterDmgPopup.classList.add('active');
+        if (monsterSlash) monsterSlash.classList.add('active');
+        if (monsterDmgPopup) {
+            monsterDmgPopup.textContent = `-${dmg}`;
+            monsterDmgPopup.classList.add('active');
+        }
         
-        arenaMonsterSprite.classList.add('flash-dmg');
+        if (arenaMonsterSprite) arenaMonsterSprite.classList.add('flash-dmg');
 
-        battleStatusText.textContent = `> CRITICAL STRIKE! You dealt ${dmg} damage to the monster!`;
-        logMessage(`> Solved "${q.id}": Dealt ${dmg} damage to Monster!`, "standard");
+        if (battleStatusText) battleStatusText.textContent = `> CRITICAL STRIKE! You dealt ${dmg} damage to the monster!`;
+        logMessage(`> Solved question: Dealt ${dmg} damage to Monster!`, "standard");
 
         setTimeout(() => {
-            monsterSlash.classList.remove('active');
-            monsterDmgPopup.classList.remove('active');
-            arenaMonsterSprite.classList.remove('flash-dmg');
+            if (monsterSlash) monsterSlash.classList.remove('active');
+            if (monsterDmgPopup) monsterDmgPopup.classList.remove('active');
+            if (arenaMonsterSprite) arenaMonsterSprite.classList.remove('flash-dmg');
             
-            // Advance Question
             currentBattle.currentIndex++;
             if (currentBattle.monsterHp <= 0) {
                 endBattle(true);
@@ -509,7 +537,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleMonsterAttack() {
-        // Calculate penalty damage to player HP
         let penaltyDmg = 10;
         if (currentBattle.difficulty === 'medium') penaltyDmg = 20;
         if (currentBattle.difficulty === 'hard') penaltyDmg = 30;
@@ -517,23 +544,24 @@ document.addEventListener('DOMContentLoaded', () => {
         playerState.hp = Math.max(0, playerState.hp - penaltyDmg);
         renderUI();
 
-        // Visual effects (Slash on player, shake window)
         const playerSlash = document.getElementById('player-slash');
         const playerDmgPopup = document.getElementById('player-dmg-popup');
         
-        playerSlash.classList.add('active');
-        playerDmgPopup.textContent = `-${penaltyDmg}`;
-        playerDmgPopup.classList.add('active');
+        if (playerSlash) playerSlash.classList.add('active');
+        if (playerDmgPopup) {
+            playerDmgPopup.textContent = `-${penaltyDmg}`;
+            playerDmgPopup.classList.add('active');
+        }
         
-        battleWindow.classList.add('shake');
+        if (battleWindow) battleWindow.classList.add('shake');
         logMessage(`> Failed Question: Monster counters, dealing ${penaltyDmg} damage!`, "err");
 
-        battleStatusText.textContent = `> MISS! The monster counters and strikes you for ${penaltyDmg} HP!`;
+        if (battleStatusText) battleStatusText.textContent = `> MISS! The monster counters and strikes you for ${penaltyDmg} HP!`;
 
         setTimeout(() => {
-            playerSlash.classList.remove('active');
-            playerDmgPopup.classList.remove('active');
-            battleWindow.classList.remove('shake');
+            if (playerSlash) playerSlash.classList.remove('active');
+            if (playerDmgPopup) playerDmgPopup.classList.remove('active');
+            if (battleWindow) battleWindow.classList.remove('shake');
 
             if (playerState.hp <= 0) {
                 endBattle(false);
@@ -543,10 +571,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function endBattle(victory) {
         currentBattle.active = false;
-        battleCloseBtn.classList.remove('hidden');
+        
+        // 🎯 UNHIDE RETURN TO MAP BUTTON ONLY AFTER BATTLE ENDS
+        if (battleCloseBtn) battleCloseBtn.classList.remove('hidden');
 
         if (victory) {
-            // Defeat Monster Rewards
             let xpReward = 50;
             let goldReward = 20;
             let monsterLabelName = "Slime of Variables";
@@ -567,14 +596,16 @@ document.addEventListener('DOMContentLoaded', () => {
             logMessage(`> VICTORY! Slain the ${monsterLabelName}!`, "gold");
             logMessage(`> Earned rewards: +${xpReward} XP, +${goldReward} GP!`, "gold");
 
-            battleStatusText.textContent = `> VICTORY! You have slain the monster! Recycled logs: +${xpReward} XP, +${goldReward} GP!`;
+            // 🎯 SHOW VICTORY MESSAGE ONLY NOW
+            if (battleStatusText) {
+                battleStatusText.textContent = `> VICTORY! You have slain the monster! Recycled logs: +${xpReward} XP, +${goldReward} GP!`;
+            }
             
-            // Check Level up
             let xpRequired = playerState.level * 1000;
             if (playerState.xp >= xpRequired) {
                 playerState.xp -= xpRequired;
                 playerState.level++;
-                playerState.hp = 100; // Restore health on level up!
+                playerState.hp = 100;
                 logMessage(`> LEVEL UP! Reached Level ${playerState.level}! Health fully restored.`, "gold");
                 showLevelUpAlert();
             }
@@ -583,17 +614,14 @@ document.addEventListener('DOMContentLoaded', () => {
             updateMonsterStatus();
             saveGameState();
         } else {
-            // Player Fainted
-            logMessage("> DEFEATED! You collapsed in the dungeon floor...", "err");
+            logMessage("> DEFEATED! You collapsed on the dungeon floor...", "err");
             
-            // Penalize gold, revive at hub with 50 hp
             playerState.hp = 50;
             const goldLoss = Math.floor(playerState.gold * 0.1);
             playerState.gold = Math.max(0, playerState.gold - goldLoss);
             
             logMessage(`> Revived at Dungeon Hub. HP set to 50. Lost ${goldLoss} GP penalty.`, "err");
-            
-            battleStatusText.textContent = `> DEFEATED! You fainted! Revived at Dungeon Hub. GP penalty: -${goldLoss} GP.`;
+            if (battleStatusText) battleStatusText.textContent = `> DEFEATED! You fainted! Revived at Dungeon Hub. GP penalty: -${goldLoss} GP.`;
             
             renderUI();
             updateMonsterStatus();
@@ -603,76 +631,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    battleCloseBtn.addEventListener('click', () => {
-        battleModal.style.display = 'none';
+   // Close / Return to Map click listener
+    if (battleCloseBtn) {
+        battleCloseBtn.addEventListener('click', () => {
+            currentBattle.active = false;
+            if (battleModal) {
+                battleModal.style.display = 'none';
+            }
+            logMessage("> Returned to Map.");
+        });
+    }
+
+    // Tab Navigation
+    navTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabName = tab.getAttribute('data-tab');
+            
+            navTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            tabPanes.forEach(pane => {
+                pane.classList.remove('active');
+                if (pane.id === `tab-content-${tabName}`) {
+                    pane.classList.add('active');
+                }
+            });
+            
+            sidebarNavBtns.forEach(btn => btn.classList.remove('active'));
+            if (tabName === 'quest') {
+                document.querySelector('[data-tab-nav="quests-nav"]')?.classList.add('active');
+            } else if (tabName === 'equipment') {
+                document.querySelector('[data-tab-nav="inventory-nav"]')?.classList.add('active');
+            }
+        });
     });
 
-    // ==================== MERCHANT & INVENTORY ====================
-    // HP Potion quick slot use
-    slotPotion.addEventListener('click', () => {
-        if (playerState.potions <= 0) {
-            logMessage("> You don't have any HP Potions left!", "err");
-            showAlert("No Potions", "You don't have any potions. Visit the Equipment Merchant Vault to buy more using GP.");
-            return;
-        }
+    sidebarNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            sidebarNavBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-        if (playerState.hp >= 100) {
-            logMessage("> Your health is already full!", "standard");
-            return;
-        }
-
-        playerState.potions--;
-        playerState.hp = Math.min(100, playerState.hp + 50);
-        
-        logMessage(`> Drank HP Potion: Restored 50 Health!`, "standard");
-        
-        renderUI();
-        saveGameState();
+            const navType = btn.getAttribute('data-tab-nav');
+            if (navType === 'quests-nav') {
+                document.querySelector('[data-tab="quest"]')?.click();
+            } else if (navType === 'inventory-nav') {
+                document.querySelector('[data-tab="equipment"]')?.click();
+            } else if (navType === 'skills-nav') {
+                document.querySelector('[data-tab="lore"]')?.click();
+                logMessage("> Skill Tree: Locked. Earn levels to unlock advanced algorithms.");
+                showAlert("Skill Tree", "Syntactic Strike, Loop Whirlwind, and Binary Pierce are unlocked! Level up to rank them up.");
+            } else if (navType === 'map-nav') {
+                showAlert("World Map", "Floor 1: The Foundation [Active]<br>Floor 2: Recursion Crypt [Locked]<br>Floor 3: Dynamic Temple [Locked]");
+            } else if (navType === 'log-nav') {
+                adventureLog?.scrollIntoView({ behavior: 'smooth' });
+                logMessage("> Reviewing dungeon adventure files...");
+            }
+        });
     });
 
-    // Buy Potion inside Shop tab
-    buyPotionBtn.addEventListener('click', () => {
-        const cost = 50;
-        if (playerState.gold < cost) {
-            logMessage("> Not enough Gold coins to buy potion!", "err");
-            showAlert("Insufficient Gold", "HP Potion costs 50 GP. Solve more coding challenges to earn gold!");
-            return;
-        }
+    if (chapterSelect) {
+        chapterSelect.addEventListener('change', async () => {
+            playerState.current_quest = chapterSelect.value;
+            logMessage(`> Navigated to Chapter: ${chapterSelect.options[chapterSelect.selectedIndex].text.replace(/^\d+\.\s*/, '')}`);
+            await renderUI();
+            await updateMonsterStatus();
+            await saveGameState();
+        });
+    }
 
-        playerState.gold -= cost;
-        playerState.potions++;
-        
-        logMessage(`> Bought 1x HP Potion from merchant vault. (-50 GP)`, "gold");
-        
-        renderUI();
-        saveGameState();
-    });
+    if (slotPotion) {
+        slotPotion.addEventListener('click', () => {
+            if (playerState.potions <= 0) {
+                logMessage("> You don't have any HP Potions left!", "err");
+                showAlert("No Potions", "You don't have any potions. Visit Equipment Vault to buy more using GP.");
+                return;
+            }
 
-    // Upgrade Gear button
-    quickUpgradeBtn.addEventListener('click', () => {
-        // Redirect to Merchant Equipment tab
-        document.querySelector('[data-tab="equipment"]').click();
-        logMessage("> Visited the merchant's vault.");
-    });
+            if (playerState.hp >= 100) {
+                logMessage("> Your health is already full!", "standard");
+                return;
+            }
 
-    // ==================== ALERTS / MODALS ====================
+            playerState.potions--;
+            playerState.hp = Math.min(100, playerState.hp + 50);
+            
+            logMessage(`> Drank HP Potion: Restored 50 Health!`, "standard");
+            renderUI();
+            saveGameState();
+        });
+    }
+
+    if (buyPotionBtn) {
+        buyPotionBtn.addEventListener('click', () => {
+            const cost = 50;
+            if (playerState.gold < cost) {
+                logMessage("> Not enough Gold coins to buy potion!", "err");
+                showAlert("Insufficient Gold", "HP Potion costs 50 GP. Solve more coding challenges to earn gold!");
+                return;
+            }
+
+            playerState.gold -= cost;
+            playerState.potions++;
+            
+            logMessage(`> Bought 1x HP Potion from merchant vault. (-50 GP)`, "gold");
+            renderUI();
+            saveGameState();
+        });
+    }
+
+    if (quickUpgradeBtn) {
+        quickUpgradeBtn.addEventListener('click', () => {
+            document.querySelector('[data-tab="equipment"]')?.click();
+            logMessage("> Visited the merchant's vault.");
+        });
+    }
+
     function showAlert(title, message) {
-        alertTitle.textContent = title;
-        alertMsg.innerHTML = message;
-        gameAlert.style.display = 'flex';
+        if (alertTitle) alertTitle.textContent = title;
+        if (alertMsg) alertMsg.innerHTML = message;
+        if (gameAlert) gameAlert.style.display = 'flex';
     }
 
     function showLevelUpAlert() {
-        alertTitle.textContent = "LEVEL UP!";
-        alertTitle.className = "alert-title text-gold";
-        alertMsg.innerHTML = `Congratulations!<br>You reached <strong>Level ${playerState.level} Coder</strong>!<br>Your HP has been fully restored to 100.`;
-        gameAlert.style.display = 'flex';
+        if (alertTitle) {
+            alertTitle.textContent = "LEVEL UP!";
+            alertTitle.className = "alert-title text-gold";
+        }
+        if (alertMsg) {
+            alertMsg.innerHTML = `Congratulations!<br>You reached <strong>Level ${playerState.level} Coder</strong>!<br>Your HP has been fully restored to 100.`;
+        }
+        if (gameAlert) gameAlert.style.display = 'flex';
     }
 
-    alertOkBtn.addEventListener('click', () => {
-        gameAlert.style.display = 'none';
-    });
+    if (alertOkBtn) {
+        alertOkBtn.addEventListener('click', () => {
+            if (gameAlert) gameAlert.style.display = 'none';
+        });
+    }
 
-    // Initialize Game state
     loadGameState();
 });

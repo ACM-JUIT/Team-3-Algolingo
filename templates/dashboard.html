@@ -46,7 +46,7 @@
                     <!-- Avatar Frame -->
                     <div class="avatar-frame">
                         <!-- Pure CSS rendering of a pixel-art hero if image fails, otherwise displays nice thumbnail -->
-                        <div class="pixel-avatar" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -470px -365px;"></div>
+                        <div class="pixel-avatar" style="background-image: url('/static/items_spritesheet.png'); background-position: -470px -365px;"></div>
                     </div>
                     
                     <!-- Username & Class -->
@@ -123,17 +123,17 @@
                 <div class="dungeon-viewport inner-window">
                     <div class="viewport-content viewport-relative">
                         <!-- Dungeon Map Image -->
-                        <div class="dungeon-bg" style="background-image: url('{{ url_for('static', filename='tower.png') }}');"></div>
+                        <div class="dungeon-bg" style="background-image: url('/static/tower.png');"></div>
                         
                         <!-- Knight Character -->
                         <div class="knight-sprite-container" id="player-knight">
-                            <div class="knight-sprite" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}');"></div>
+                            <div class="knight-sprite" style="background-image: url('/static/items_spritesheet.png');"></div>
                             <div class="action-tooltip" id="space-tooltip">Ready for Battle</div>
                         </div>
 
                         <!-- Easy Monster: Slime -->
                         <div class="monster-sprite-container target-monster" id="monster-easy" data-difficulty="easy">
-                            <div class="monster-sprite green-slime-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}');"></div>
+                            <div class="monster-sprite green-slime-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
                             <div class="monster-name-tag border-green">
                                 <span class="monster-tag-diff text-green">EASY</span>
                                 <span class="monster-tag-hp" id="monster-easy-hp">100/100 HP</span>
@@ -142,7 +142,7 @@
 
                         <!-- Medium Monster: Skeleton -->
                         <div class="monster-sprite-container target-monster" id="monster-medium" data-difficulty="medium">
-                            <div class="monster-sprite skeleton-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}');"></div>
+                            <div class="monster-sprite skeleton-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
                             <div class="monster-name-tag border-gold">
                                 <span class="monster-tag-diff text-gold">MEDIUM</span>
                                 <span class="monster-tag-hp" id="monster-medium-hp">150/150 HP</span>
@@ -151,7 +151,7 @@
 
                         <!-- Hard Monster: Beholder -->
                         <div class="monster-sprite-container target-monster" id="monster-hard" data-difficulty="hard">
-                            <div class="monster-sprite beholder-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}');"></div>
+                            <div class="monster-sprite beholder-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
                             <div class="monster-name-tag border-red">
                                 <span class="monster-tag-diff text-red">HARD</span>
                                 <span class="monster-tag-hp" id="monster-hard-hp">200/200 HP</span>
@@ -170,13 +170,13 @@
                             <div class="quick-slots-container">
                                 <!-- Slot 1: HP Potion -->
                                 <div class="slot-cell item-potion" id="slot-potion">
-                                    <div class="slot-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -20px -25px;"></div>
+                                    <div class="slot-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -20px -25px;"></div>
                                     <span class="slot-count" id="potion-count">x5</span>
                                     <span class="slot-label">USE (HEAL)</span>
                                 </div>
                                 <!-- Slot 2: Sword of Logic -->
                                 <div class="slot-cell equipped" id="slot-weapon">
-                                    <div class="slot-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -470px -245px;"></div>
+                                    <div class="slot-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -470px -245px;"></div>
                                     <span class="slot-count">x1</span>
                                     <span class="slot-label">EQUIPPED</span>
                                 </div>
@@ -199,17 +199,48 @@
                         <div class="viewport-content widget-padding">
                             <h3 class="widget-title">Select Quest Chapter</h3>
                             <select id="chapter-select" class="retro-dropdown">
-                                <option value="variables">🐍 1. Variables & Data Types</option>
-                                <option value="io">📡 2. Input and Output</option>
-                                <option value="operators">⚙️ 3. Operators</option>
-                                <option value="conditionals">🔀 4. Conditional Statements</option>
-                                <option value="loops">🔄 5. Loops</option>
-                                <option value="strings">🔤 6. Strings</option>
-                                <option value="lists">📊 7. Lists</option>
-                                <option value="tuples">🔒 8. Tuples</option>
-                                <option value="dicts">📖 9. Dictionaries</option>
-                                <option value="sets">🔵 10. Sets</option>
-                            </select>
+    <!-- 🐍 PYTHON TOPICS -->
+<optgroup label=" PYTHON">
+    <option value="Input and Output in Python">1. Input and Output in Python</option>
+    <option value="Variables & Data Types in Python">2. Variables & Data Types in Python</option>
+    <option value="Operators in Python">3. Operators in Python</option>
+    <option value="Conditional Statements in Python">4. Conditional Statements in Python</option>
+    <option value="Loops in Python">5. Loops in Python</option>
+    <option value="Lists in Python">6. Lists in Python</option>
+    <option value="Tuples in Python">7. Tuples in Python</option>
+    <option value="Dictionaries in Python">8. Dictionaries in Python</option>
+    <option value="Sets in Python">9. Sets in Python</option>
+    <option value="Strings in Python">10. Strings in Python</option>
+</optgroup>
+
+<!-- ☕ JAVA TOPICS -->
+<optgroup label="JAVA">
+    <option value="Java Introduction">11. Java Introduction</option>
+    <option value="Java Data Types & Variables">12. Java Data Types and Variables</option>
+    <option value="Java Operators">13. Java Operators</option>
+    <option value="Java Control Statements">14. Java Control Statements</option>
+    <option value="Java Methods">15. Java Methods</option>
+    <option value="Java Arrays & Strings">16. Java Arrays & Strings</option>
+    <option value="Java OOP">17. Java OOP</option>
+    <option value="Java Exception Handling">18. Java Exception Handling</option>
+    <option value="Java Collections">19. Java Collections</option>
+    <option value="Java File I/O">20. Java File I/O</option>
+</optgroup>
+
+<!-- ⚡ C++ TOPICS -->
+<optgroup label="C++">
+    <option value="Data Types & Operators">21. Data Types & Operators</option>
+    <option value="Control Structures">22. Control Structures</option>
+    <option value="Functions & Recursion">23. Functions & Recursion</option>
+    <option value="Arrays, Strings & Pointers">24. Arrays, Strings & Pointers</option>
+    <option value="Object-Oriented Programming">25. Object-Oriented Programming</option>
+    <option value="Constructors & Overloading">26. Constructors & Overloading</option>
+    <option value="Templates">27. Templates</option>
+    <option value="Exception Handling">28. Exception Handling</option>
+    <option value="STL">29. STL</option>
+    <option value="File Handling">30. File Handling</option>
+</optgroup>
+</select>
                             
                             <div class="quest-progress-summary">
                                 <div class="quest-prog-item">
@@ -249,7 +280,7 @@
                             <div class="bestiary-card inner-window">
                                 <div class="viewport-content widget-padding">
                                     <div class="bestiary-sprite-header bg-green">
-                                        <div class="sprite-crop green-slime-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}'); transform: scale(1.5);"></div>
+                                        <div class="sprite-crop green-slime-sprite" style="background-image: url('/static/monsters_spritesheet.png'); transform: scale(1.5);"></div>
                                     </div>
                                     <h3>THE SLIME OF SORTING</h3>
                                     <p class="monster-desc">Guardians of easy concepts. They split when attacked but dissolve quickly when hit with direct definitions.</p>
@@ -265,7 +296,7 @@
                             <div class="bestiary-card inner-window">
                                 <div class="viewport-content widget-padding">
                                     <div class="bestiary-sprite-header bg-purple">
-                                        <div class="sprite-crop skeleton-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}'); transform: scale(1.5);"></div>
+                                        <div class="sprite-crop skeleton-sprite" style="background-image: url('/static/monsters_spritesheet.png'); transform: scale(1.5);"></div>
                                     </div>
                                     <h3>SKELETON OF STACKS</h3>
                                     <p class="monster-desc">A rigid undead guardian that operates strictly under Last-In-First-Out logic. Strike when it's overloaded.</p>
@@ -281,7 +312,7 @@
                             <div class="bestiary-card inner-window">
                                 <div class="viewport-content widget-padding">
                                     <div class="bestiary-sprite-header bg-red">
-                                        <div class="sprite-crop beholder-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}'); transform: scale(1.5);"></div>
+                                        <div class="sprite-crop beholder-sprite" style="background-image: url('/static/monsters_spritesheet.png'); transform: scale(1.5);"></div>
                                     </div>
                                     <h3>BEHOLDER OF BINARY</h3>
                                     <p class="monster-desc">An ancient aberration that divides paths and logic in trees. Extremely powerful logic required to break its armor.</p>
@@ -309,7 +340,7 @@
                             <!-- HP Potion Item -->
                             <div class="shop-card inner-window">
                                 <div class="viewport-content widget-padding shop-item-body">
-                                    <div class="shop-item-icon" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}'); background-position: -20px -25px;"></div>
+                                    <div class="shop-item-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -20px -25px;"></div>
                                     <h3>HP POTION</h3>
                                     <p>Restores 50 HP points immediately. Use it when low in health during/outside battles.</p>
                                     <div class="shop-buy-action">
@@ -384,7 +415,7 @@
                     <!-- Left: Knight Fighter -->
                     <div class="arena-fighter player-fighter" id="arena-player">
                         <div class="arena-sprite-container">
-                            <div class="knight-sprite animated-breathing" style="background-image: url('{{ url_for('static', filename='items_spritesheet.png') }}');"></div>
+                            <div class="knight-sprite animated-breathing" style="background-image: url('/static/items_spritesheet.png');"></div>
                             <div class="damage-number" id="player-dmg-popup">-15</div>
                             <div class="slash-overlay" id="player-slash"></div>
                         </div>
@@ -398,7 +429,7 @@
                     <div class="arena-fighter monster-fighter" id="arena-monster">
                         <div class="arena-sprite-container">
                             <!-- Dynamically loaded monster sprite classes -->
-                            <div class="monster-sprite animated-breathing" id="arena-monster-sprite" style="background-image: url('{{ url_for('static', filename='monsters_spritesheet.png') }}');"></div>
+                            <div class="monster-sprite animated-breathing" id="arena-monster-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
                             <div class="damage-number" id="monster-dmg-popup">-25</div>
                             <div class="slash-overlay" id="monster-slash"></div>
                         </div>
@@ -479,7 +510,7 @@ print(type(x))</code></pre>
     </div>
 
     <!-- Core Javascript Data & Logic -->
-    <script src="{{ url_for('static', filename='js/questions.js') }}"></script>
+    
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

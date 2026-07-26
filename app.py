@@ -1,4 +1,9 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+import os
+from dotenv import load_dotenv
+from questions_routes import questions_bp
+
+
+from flask import Flask, render_template, request, redirect, session, jsonify,url_for
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
@@ -24,7 +29,7 @@ google = oauth.register(
         "scope": "openid email profile"
     }
 )
-
+app.register_blueprint(questions_bp)
 @app.route('/')
 def index():
     return render_template('index.html')
