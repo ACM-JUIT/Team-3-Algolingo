@@ -22,7 +22,9 @@
 }
 
 .hero-card {
-    border-radius: 0;
+    border-radius: 8px;
+    background: #111315;
+    border: 1px solid #22252a;
 }
 
 .hero-card-body {
@@ -33,25 +35,25 @@
 }
 
 .avatar-frame {
-    width: 96px;
-    height: 96px;
-    border: 4px solid var(--black);
-    background-color: var(--surface-container-lowest);
+    width: 90px;
+    height: 90px;
+    border: 2px solid #2d3139;
+    border-radius: 8px;
+    background-color: #181b20;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: inset 4px 4px 0px rgba(0,0,0,0.4), 2px 2px 0px rgba(255,255,255,0.05);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
     margin-bottom: 12px;
     position: relative;
     overflow: hidden;
 }
 
-.pixel-avatar {
-    width: 64px;
-    height: 64px;
-    background-size: 893px 475px;
-    background-repeat: no-repeat;
-    transform: scale(1.3);
+.hero-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
 }
 
 .hero-info {
@@ -61,18 +63,18 @@
 }
 
 .hero-name {
-    font-size: 20px;
-    color: var(--white);
-    text-shadow: 2px 2px 0px var(--black);
+    font-size: 19px;
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 2px;
     word-break: break-all;
 }
 
 .hero-class {
     font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--primary);
-    font-weight: bold;
-    text-transform: uppercase;
+    font-size: 13px;
+    color: #c084fc;
+    font-weight: 600;
 }
 
 /* Progress Bars */
@@ -91,31 +93,41 @@
 }
 
 .stat-label {
-    color: var(--on-surface-variant);
+    color: #94a3b8;
 }
 
 .stat-values {
-    color: var(--white);
+    color: #ffffff;
 }
 
 .hp-bar {
     display: flex;
-    border: 3px solid var(--black);
-    background-color: var(--surface-container-lowest);
-    padding: 1px;
-    height: 18px;
+    border: 1.5px solid #2d3139;
+    background-color: #14171c;
+    border-radius: 4px;
+    height: 14px;
     width: 100%;
-    box-shadow: 1px 1px 0px rgba(255,255,255,0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+.retro-segmented-bar {
+    background-image: repeating-linear-gradient(90deg, transparent, transparent 8px, #0b0d10 8px, #0b0d10 10px);
 }
 
 .border-gold {
-    border-color: var(--black);
+    border-color: #3b3520;
 }
 
 .hp-segment {
     height: 100%;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.bg-green { background-color: #4ade80 !important; }
+.bg-gold { background-color: #facc15 !important; }
+.bg-red { background-color: #f87171 !important; }
+.bg-purple { background-color: #c084fc !important; }
 
 /* Sidebar Nav Buttons */
 .sidebar-nav {
@@ -129,49 +141,83 @@
     align-items: center;
     gap: 12px;
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    text-transform: uppercase;
-    padding: 12px 16px;
-    border: 2px solid var(--black);
-    background-color: var(--surface-container-high);
-    color: var(--on-surface);
+    padding: 11px 16px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background-color: transparent;
+    color: #94a3b8;
     cursor: pointer;
     text-align: left;
-    box-shadow: 3px 3px 0px var(--black);
-    position: relative;
-    top: 0;
-    left: 0;
+    transition: all 0.15s ease;
 }
 
 .sidebar-btn:hover {
-    background-color: var(--surface-container-highest);
-    color: var(--white);
+    background-color: #1a1d24;
+    color: #ffffff;
 }
 
+.sidebar-btn.status-btn.active,
 .sidebar-btn.active {
-    background-color: var(--secondary);
-    color: var(--on-secondary);
-}
-
-.sidebar-btn:active {
-    top: 2px;
-    left: 2px;
-    box-shadow: 1px 1px 0px var(--black);
+    background-color: #4ade80 !important;
+    color: #0b0f13 !important;
+    font-weight: 800;
+    border: none;
+    box-shadow: 0 2px 8px rgba(74, 222, 128, 0.25);
 }
 
 .upgrade-btn {
     width: 100%;
     margin-top: auto;
     font-size: 14px;
+    font-weight: 800;
     padding: 12px;
+    background-color: #c084fc !important;
+    color: #111315 !important;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(192, 132, 252, 0.25);
+    transition: transform 0.1s ease, filter 0.15s ease;
+}
+
+.upgrade-btn:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+
+/* Header right controls */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon-btn {
+    background: #1e2229;
+    border: 1px solid #2d3139;
+    color: #cbd5e1;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.15s ease;
+}
+
+.icon-btn:hover {
+    background: #2a303a;
 }
 
 /* Main Area Layout */
 .main-content-panel {
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Prevents overflow */
+    min-width: 0;
 }
 
 /* Tab panes visibility */
@@ -190,173 +236,225 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--surface-container-lowest);
-    border: 2px solid var(--black);
-    padding: 12px 16px;
-    box-shadow: 2px 2px 0px var(--black);
+    background-color: #111315;
+    border: 1px solid #22252a;
+    border-radius: 6px;
+    padding: 12px 18px;
     margin-bottom: 16px;
 }
 
-.floor-title {
+.floor-title-card {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.location-badge {
-    background-color: var(--primary);
-    color: var(--on-primary);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border: 2px solid var(--black);
-    text-transform: uppercase;
-}
-
-.floor-title h2 {
+.floor-title-gold {
     font-size: 20px;
-    color: var(--white);
+    color: #facc15;
+    font-weight: 700;
     margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
 }
 
 .location-text {
     font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--on-surface-variant);
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.floor-gp-pill {
+    background: #181b20;
+    border: 1.5px solid #2d3139;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: #facc15;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* Isometric Dungeon Viewport */
 .dungeon-viewport {
-    height: 380px;
-    border-radius: 0;
+    height: 440px;
+    background: #090a0d;
+    border: 2px solid #22252a;
+    border-radius: 6px;
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.65);
+}
+
+.dungeon-viewport-bar {
+    background: #14161b;
+    color: #94a3b8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-bottom: 2px solid #22252a;
+    letter-spacing: 0.5px;
+    user-select: none;
 }
 
 .viewport-relative {
     position: relative;
     overflow: hidden;
-    height: 100%;
+    height: calc(100% - 31px);
+    outline: none;
+    cursor: crosshair;
 }
 
 .dungeon-bg {
     width: 100%;
     height: 100%;
-    background-size: cover;
+    background-size: 100% 100%;
     background-position: center;
     position: absolute;
     top: 0;
     left: 0;
-    opacity: 0.85;
-    /* Dither / retro CRT filter look */
-    filter: brightness(0.85) contrast(1.1);
+    image-rendering: pixelated;
 }
 
-/* Knight Sprite Overlays */
+.map-controls-hud {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: rgba(15, 17, 21, 0.85);
+    border: 1px solid #2d3139;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: #94a3b8;
+    z-index: 15;
+    backdrop-filter: blur(4px);
+    user-select: none;
+}
+
+/* Knight Hero Sprite (Movable!) */
 .knight-sprite-container {
     position: absolute;
-    bottom: 95px;
-    left: 175px;
-    z-index: 10;
+    z-index: 20;
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
-    transition: transform 0.2s ease;
+    cursor: grab;
+    transition: left 0.12s linear, top 0.12s linear;
+    user-select: none;
+    width: 60px;
+    height: 95px;
 }
 
-.knight-sprite-container:hover {
-    transform: scale(1.1);
+.character-shadow,
+.monster-shadow {
+    position: absolute;
+    bottom: 4px;
+    width: 44px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    z-index: -1;
 }
 
-.knight-sprite {
-    width: 64px;
-    height: 64px;
-    background-size: 893px 475px;
-    background-repeat: no-repeat;
-    background-position: -470px -245px; /* Sword of logic knight sprite */
+.hero-character-img {
+    width: 58px;
+    height: 92px;
+    object-fit: contain;
     image-rendering: pixelated;
-    animation: bounce-small 2s infinite ease-in-out;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.65));
+    transition: transform 0.1s ease;
+}
+
+.knight-sprite-container.facing-left .hero-character-img {
+    transform: scaleX(-1);
+}
+
+.knight-sprite-container.walking .hero-character-img {
+    animation: hero-step-bob 0.2s infinite alternate ease-in-out;
+}
+
+@keyframes hero-step-bob {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-4px); }
 }
 
 /* Floating Action Tooltip */
 .action-tooltip {
-    background-color: var(--black);
-    color: var(--secondary);
+    position: absolute;
+    top: -30px;
+    background: #0f1115;
+    color: #4ade80;
+    border: 1.5px solid #4ade80;
+    border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: bold;
-    padding: 3px 6px;
-    border: 2px solid var(--secondary);
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 3px 8px;
     text-transform: uppercase;
     white-space: nowrap;
-    margin-top: 4px;
-    box-shadow: 2px 2px 0px var(--black);
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+    animation: pulse-green 1.4s infinite;
+    z-index: 30;
+    pointer-events: none;
+}
+
+@keyframes pulse-green {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(74, 222, 128, 0.4); }
+    50% { transform: scale(1.06); box-shadow: 0 0 16px rgba(74, 222, 128, 0.7); }
 }
 
 /* Monster Sprites Overlays */
 .monster-sprite-container {
     position: absolute;
-    z-index: 9;
+    z-index: 18;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, opacity 0.4s ease, filter 0.2s ease;
+    user-select: none;
 }
 
 .monster-sprite-container:hover {
-    transform: scale(1.15) translateY(-5px);
+    transform: translateY(-4px) scale(1.08);
 }
 
-#monster-easy {
-    bottom: 210px;
-    left: 380px;
-}
-
-#monster-medium {
-    bottom: 85px;
-    left: 560px;
-}
-
-#monster-hard {
-    bottom: 175px;
-    left: 780px;
-}
-
-.monster-sprite {
-    width: 80px;
-    height: 80px;
-    background-size: 893px 475px;
-    background-repeat: no-repeat;
+.monster-character-img {
+    width: 66px;
+    height: 66px;
+    object-fit: contain;
     image-rendering: pixelated;
-    animation: bounce-small 2.5s infinite ease-in-out;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    animation: monster-float 2.8s infinite ease-in-out;
 }
 
-#monster-medium .monster-sprite {
-    animation-delay: 0.5s;
-}
-
-#monster-hard .monster-sprite {
-    animation-delay: 1s;
+@keyframes monster-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
 }
 
 .monster-name-tag {
-    background-color: var(--black);
-    border: 2px solid var(--black);
+    background-color: rgba(15, 17, 21, 0.95);
+    border: 1.5px solid #2d3139;
+    border-radius: 4px;
     padding: 2px 6px;
     display: flex;
-    flex-direction: column;
+    gap: 4px;
     align-items: center;
-    box-shadow: 2px 2px 0px var(--black);
-    margin-top: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    margin-top: -6px;
+    z-index: 2;
 }
 
 .monster-tag-diff {
     font-family: var(--font-mono);
-    font-size: 8px;
-    font-weight: bold;
+    font-size: 8.5px;
+    font-weight: 800;
 }
 
 .monster-tag-hp {
@@ -366,103 +464,184 @@
     font-weight: bold;
 }
 
-.border-green { border-color: var(--secondary); }
-.border-gold { border-color: var(--tertiary); }
-.border-red { border-color: var(--error); }
+.border-green { border-color: #4ade80 !important; }
+.border-gold { border-color: #facc15 !important; }
+.border-red { border-color: #f87171 !important; }
+.text-green { color: #4ade80 !important; }
+.text-gold { color: #facc15 !important; }
+.text-red { color: #f87171 !important; }
+
+/* Attack Slash FX */
+.slash-animation {
+    position: absolute;
+    top: 10px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border-right: 4px solid #7dd3fc;
+    border-top: 4px solid #38bdf8;
+    box-shadow: 0 0 16px #38bdf8;
+    animation: slash-arc 0.22s ease-out forwards;
+    pointer-events: none;
+    z-index: 28;
+}
+
+@keyframes slash-arc {
+    0% { transform: scale(0.6) rotate(-45deg); opacity: 1; }
+    100% { transform: scale(1.4) rotate(45deg); opacity: 0; }
+}
+
+.monster-sprite-container.hit {
+    filter: brightness(2.5) drop-shadow(0 0 16px red) !important;
+    transform: scale(1.15);
+}
+
+.monster-sprite-container.defeated {
+    opacity: 0.3 !important;
+    filter: grayscale(1) !important;
+    pointer-events: none;
+}
 
 /* Bottom Widgets Grid */
 .bottom-widgets-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr;
+    grid-template-columns: 240px 1.3fr 1fr;
     gap: 16px;
     margin-top: 4px;
 }
 
 .widget-box {
-    border-radius: 0;
+    border-radius: 6px;
+    background: #111315;
+    border: 1px solid #22252a;
 }
 
 .widget-padding {
-    padding: 16px;
+    padding: 14px;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .widget-title {
-    font-size: 14px;
-    margin-bottom: 12px;
-    color: var(--white);
-    border-bottom: 2px solid var(--black);
-    padding-bottom: 4px;
+    font-size: 13.5px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
-/* Quick Slots Component */
+/* Quick Slots Component matching Mockup */
 .quick-slots-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .slot-cell {
-    border: 2px solid var(--black);
-    background-color: var(--surface-container-lowest);
-    height: 80px;
+    border: 1.5px solid #2d3139;
+    border-radius: 6px;
+    background-color: #16181d;
+    width: 46px;
+    height: 46px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
     cursor: pointer;
-    box-shadow: inset 2px 2px 0px rgba(0,0,0,0.5), 1px 1px 0px rgba(255,255,255,0.05);
+    transition: all 0.15s ease;
 }
 
 .slot-cell:hover {
-    border-color: var(--primary);
-    background-color: var(--surface-container-high);
+    border-color: #4ade80;
+    transform: translateY(-2px);
 }
 
 .slot-cell.equipped {
-    border-color: var(--secondary);
-    background-color: var(--on-secondary-container);
+    border-color: #3b82f6;
+    background-color: #171e2c;
 }
 
-.slot-icon {
-    width: 44px;
-    height: 44px;
-    background-size: 893px 475px;
-    background-repeat: no-repeat;
-    transform: scale(1.1);
+.slot-icon-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
     image-rendering: pixelated;
 }
 
 .slot-count {
     position: absolute;
-    top: 4px;
-    right: 6px;
+    bottom: 2px;
+    right: 4px;
     font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: bold;
-    color: var(--tertiary);
-    background-color: var(--black);
-    padding: 1px 4px;
-    border: 1px solid var(--black);
-}
-
-.slot-label {
-    font-family: var(--font-mono);
-    font-size: 8px;
-    color: var(--on-surface-variant);
-    margin-top: 4px;
-    text-align: center;
-    font-weight: bold;
-}
-
-.slot-cell.equipped .slot-label {
-    color: var(--secondary);
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #facc15;
+    text-shadow: 1px 1px 0 #000;
 }
 
 .slot-cell.empty {
-    cursor: not-allowed;
-    opacity: 0.6;
+    border-style: dashed;
+    border-color: #262930;
+    cursor: default;
+}
+
+/* Active Quests List matching Mockup */
+.active-quests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.quest-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.quest-color-box {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.quest-name {
+    color: #e2e8f0;
+    font-weight: 600;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-status-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.chapter-select-container {
+    margin-top: auto;
+}
+
+/* Arena fighter images (Battle Modal) */
+.arena-hero-img {
+    width: 80px;
+    height: 120px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8));
+}
+
+.arena-monster-img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8));
 }
 
 /* Chapter Selector Component */
