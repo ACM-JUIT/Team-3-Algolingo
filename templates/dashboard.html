@@ -25,12 +25,14 @@
                 <a href="#" class="nav-tab" data-tab="lore">Lore</a>
             </nav>
             <div class="header-right">
-                <!-- Gold GP Display -->
+            <!-- Gold GP Display & Actions -->
+            <div class="header-right">
                 <div class="gold-display">
                     <span class="gold-icon">🪙</span>
                     <span id="gold-amount">1,250</span> GP
                 </div>
-                <!-- Profile / Settings Buttons -->
+                <button class="icon-btn settings-btn" title="Settings" type="button">⚙️</button>
+                <button class="icon-btn profile-btn" title="Profile" type="button">👤</button>
                 <a href="/logout" class="btn btn-stone btn-sm logout-btn">LOGOUT</a>
             </div>
         </div>
@@ -45,24 +47,23 @@
                 <div class="viewport-content hero-card-body">
                     <!-- Avatar Frame -->
                     <div class="avatar-frame">
-                        <!-- Pure CSS rendering of a pixel-art hero if image fails, otherwise displays nice thumbnail -->
-                        <div class="pixel-avatar" style="background-image: url('/static/items_spritesheet.png'); background-position: -470px -365px;"></div>
+                        <img src="{{ url_for('static', filename='hero_avatar.png') }}" alt="Hero Avatar" class="hero-avatar-img" id="hero-avatar-pic">
                     </div>
                     
                     <!-- Username & Class -->
                     <div class="hero-info">
                         <h2 class="hero-name" id="hero-name">{{ username }}</h2>
-                        <span class="hero-class" id="hero-level-label">Level 1 Coder</span>
+                        <span class="hero-class" id="hero-level-label">Level 14 Coder</span>
                     </div>
 
                     <!-- HP Progress Bar -->
                     <div class="stat-bar-container">
                         <div class="stat-bar-header">
                             <span class="stat-label">HP</span>
-                            <span class="stat-values" id="hp-text">100/100</span>
+                            <span class="stat-values" id="hp-text">85/100</span>
                         </div>
-                        <div class="hp-bar" id="hp-progress-bar">
-                            <div class="hp-segment filled bg-green" style="width: 100%"></div>
+                        <div class="hp-bar retro-segmented-bar" id="hp-progress-bar">
+                            <div class="hp-segment filled bg-green" style="width: 85%"></div>
                         </div>
                     </div>
 
@@ -70,10 +71,10 @@
                     <div class="stat-bar-container">
                         <div class="stat-bar-header">
                             <span class="stat-label">XP</span>
-                            <span class="stat-values" id="xp-text">0/1000</span>
+                            <span class="stat-values" id="xp-text">2400/3000</span>
                         </div>
-                        <div class="hp-bar border-gold" id="xp-progress-bar">
-                            <div class="hp-segment filled bg-gold" style="width: 0%"></div>
+                        <div class="hp-bar retro-segmented-bar border-gold" id="xp-progress-bar">
+                            <div class="hp-segment filled bg-gold" style="width: 80%"></div>
                         </div>
                     </div>
                 </div>
@@ -81,7 +82,7 @@
 
             <!-- Tab Switchers inside sidebar (Status, Inventory, Skills, Map, Log) -->
             <nav class="sidebar-nav">
-                <button class="sidebar-btn active" data-tab-nav="quests-nav">
+                <button class="sidebar-btn active status-btn" data-tab-nav="quests-nav">
                     <span class="icon">🛡️</span> Status
                 </button>
                 <button class="sidebar-btn" data-tab-nav="inventory-nav">
@@ -99,7 +100,7 @@
             </nav>
 
             <!-- Upgrade Gear Quick Button -->
-            <button class="btn btn-primary upgrade-btn" id="quick-upgrade-btn">UPGRADE GEAR</button>
+            <button class="btn btn-primary upgrade-btn" id="quick-upgrade-btn">Upgrade Gear</button>
         </aside>
 
         <!-- Right Side Panel: Workspace Area -->
@@ -110,48 +111,64 @@
                 
                 <!-- Floor Info -->
                 <div class="floor-header">
-                    <div class="floor-title">
-                        <span class="location-badge">Floor 01</span>
-                        <h2 id="current-quest-title">Variables & Data Types</h2>
+                    <div class="floor-title-card">
+                        <h2 id="current-quest-title" class="floor-title-gold">Floor 01: The Foundation</h2>
+                        <div class="location-text">
+                            Current Loc: <em>Dungeon Hub</em>
+                        </div>
                     </div>
-                    <div class="location-text">
-                        Current Loc: <span class="highlight-green">Dungeon Hub</span>
+                    <div class="floor-gp-pill">
+                        <span class="gold-icon">🪙</span>
+                        <span id="gold-amount-top">1,250</span> GP
                     </div>
                 </div>
 
                 <!-- Dungeon Isometric Viewport -->
                 <div class="dungeon-viewport inner-window">
-                    <div class="viewport-content viewport-relative">
+                    <div class="dungeon-viewport-bar" id="dungeon-viewport-bar">
+                        Dungeon Floor – Level 1: The Foundation
+                    </div>
+                    <div class="viewport-content viewport-relative" id="dungeon-stage" tabindex="0">
                         <!-- Dungeon Map Image -->
-                        <div class="dungeon-bg" style="background-image: url('/static/tower.png');"></div>
+                        <div class="dungeon-bg" id="dungeon-bg" style="background-image: url('{{ url_for('static', filename='dungeon_map.png') }}');"></div>
                         
-                        <!-- Knight Character -->
-                        <div class="knight-sprite-container" id="player-knight">
-                            <div class="knight-sprite" style="background-image: url('/static/items_spritesheet.png');"></div>
-                            <div class="action-tooltip" id="space-tooltip">Ready for Battle</div>
+                        <!-- Floating Controls Guide -->
+                        <div class="map-controls-hud">
+                            <span>⌨️ WASD / Arrows to Move • [SPACE] or Click to Attack</span>
                         </div>
 
-                        <!-- Easy Monster: Slime -->
-                        <div class="monster-sprite-container target-monster" id="monster-easy" data-difficulty="easy">
-                            <div class="monster-sprite green-slime-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                        <!-- Knight Hero Character (Transparent background, Movable!) -->
+                        <div class="knight-sprite-container" id="player-knight" style="left: 360px; top: 240px;">
+                            <div class="character-shadow"></div>
+                            <img src="{{ url_for('static', filename='hero.png') }}" class="hero-character-img" id="hero-sprite-art" alt="Hero">
+                            <div class="action-tooltip hidden" id="space-tooltip">[SPACE] To Attack</div>
+                            <div class="slash-animation hidden" id="hero-slash-fx"></div>
+                        </div>
+
+                        <!-- Easy Monster: Slime (Clear background) -->
+                        <div class="monster-sprite-container target-monster" id="monster-easy" data-difficulty="easy" style="left: 210px; top: 210px;">
+                            <div class="monster-shadow"></div>
+                            <img src="{{ url_for('static', filename='slime.png') }}" class="monster-character-img" id="monster-easy-img" alt="Slime">
                             <div class="monster-name-tag border-green">
                                 <span class="monster-tag-diff text-green">EASY</span>
                                 <span class="monster-tag-hp" id="monster-easy-hp">100/100 HP</span>
                             </div>
                         </div>
 
-                        <!-- Medium Monster: Skeleton -->
-                        <div class="monster-sprite-container target-monster" id="monster-medium" data-difficulty="medium">
-                            <div class="monster-sprite skeleton-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                        <!-- Medium Monster: Skeleton (Clear background) -->
+                        <div class="monster-sprite-container target-monster" id="monster-medium" data-difficulty="medium" style="left: 460px; top: 175px;">
+                            <div class="monster-shadow"></div>
+                            <img src="{{ url_for('static', filename='skeleton.png') }}" class="monster-character-img" id="monster-medium-img" alt="Skeleton">
                             <div class="monster-name-tag border-gold">
                                 <span class="monster-tag-diff text-gold">MEDIUM</span>
                                 <span class="monster-tag-hp" id="monster-medium-hp">150/150 HP</span>
                             </div>
                         </div>
 
-                        <!-- Hard Monster: Beholder -->
-                        <div class="monster-sprite-container target-monster" id="monster-hard" data-difficulty="hard">
-                            <div class="monster-sprite beholder-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                        <!-- Hard Monster: Beholder (Clear background) -->
+                        <div class="monster-sprite-container target-monster" id="monster-hard" data-difficulty="hard" style="left: 610px; top: 260px;">
+                            <div class="monster-shadow"></div>
+                            <img src="{{ url_for('static', filename='beholder.png') }}" class="monster-character-img" id="monster-hard-img" alt="Beholder">
                             <div class="monster-name-tag border-red">
                                 <span class="monster-tag-diff text-red">HARD</span>
                                 <span class="monster-tag-hp" id="monster-hard-hp">200/200 HP</span>
@@ -160,93 +177,104 @@
                     </div>
                 </div>
 
-                <!-- Bottom Widgets Panel -->
+                <!-- Bottom Widgets Panel matching Mockup -->
                 <div class="bottom-widgets-grid">
                     
                     <!-- Quick Slots Component -->
                     <div class="widget-box inner-window">
                         <div class="viewport-content widget-padding">
-                            <h3 class="widget-title">Quick Slots</h3>
+                            <h3 class="widget-title text-green">Quick Slots</h3>
                             <div class="quick-slots-container">
                                 <!-- Slot 1: HP Potion -->
-                                <div class="slot-cell item-potion" id="slot-potion">
-                                    <div class="slot-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -20px -25px;"></div>
+                                <div class="slot-cell item-potion" id="slot-potion" title="Click to Drink HP Potion (+25 HP)">
+                                    <img src="{{ url_for('static', filename='item_potion.png') }}" class="slot-icon-img" alt="Potion">
                                     <span class="slot-count" id="potion-count">x5</span>
-                                    <span class="slot-label">USE (HEAL)</span>
                                 </div>
-                                <!-- Slot 2: Sword of Logic -->
-                                <div class="slot-cell equipped" id="slot-weapon">
-                                    <div class="slot-icon" style="background-image: url('/static/items_spritesheet.png'); background-position: -470px -245px;"></div>
-                                    <span class="slot-count">x1</span>
-                                    <span class="slot-label">EQUIPPED</span>
+                                <!-- Slot 2: Mana Elixir -->
+                                <div class="slot-cell" id="slot-mana" title="Mana Elixir">
+                                    <img src="{{ url_for('static', filename='item_mana.png') }}" class="slot-icon-img" alt="Mana">
+                                    <span class="slot-count">x2</span>
                                 </div>
-                                <!-- Slot 3: Empty -->
-                                <div class="slot-cell empty">
-                                    <div class="slot-icon"></div>
-                                    <span class="slot-label">EMPTY</span>
+                                <!-- Slot 3: Sword of Logic -->
+                                <div class="slot-cell equipped" id="slot-weapon" title="Sword of Logic (Equipped)">
+                                    <img src="{{ url_for('static', filename='item_sword.png') }}" class="slot-icon-img" alt="Sword">
                                 </div>
-                                <!-- Slot 4: Empty -->
-                                <div class="slot-cell empty">
-                                    <div class="slot-icon"></div>
-                                    <span class="slot-label">EMPTY</span>
+                                <!-- Slot 4: Shield of Typing -->
+                                <div class="slot-cell equipped" id="slot-shield" title="Shield of Typing (Equipped)">
+                                    <img src="{{ url_for('static', filename='item_shield.png') }}" class="slot-icon-img" alt="Shield">
+                                </div>
+                                <!-- Slot 5: Empty Slot -->
+                                <div class="slot-cell empty" title="Empty Slot">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Quest Selector Component -->
+                    <!-- Active Quests Component -->
                     <div class="widget-box inner-window">
                         <div class="viewport-content widget-padding">
-                            <h3 class="widget-title">Select Quest Chapter</h3>
-                            <select id="chapter-select" class="retro-dropdown">
-    <!-- 🐍 PYTHON TOPICS -->
-<optgroup label=" PYTHON">
-    <option value="Input and Output in Python">1. Input and Output in Python</option>
-    <option value="Variables & Data Types in Python">2. Variables & Data Types in Python</option>
-    <option value="Operators in Python">3. Operators in Python</option>
-    <option value="Conditional Statements in Python">4. Conditional Statements in Python</option>
-    <option value="Loops in Python">5. Loops in Python</option>
-    <option value="Lists in Python">6. Lists in Python</option>
-    <option value="Tuples in Python">7. Tuples in Python</option>
-    <option value="Dictionaries in Python">8. Dictionaries in Python</option>
-    <option value="Sets in Python">9. Sets in Python</option>
-    <option value="Strings in Python">10. Strings in Python</option>
-</optgroup>
-
-<!-- ☕ JAVA TOPICS -->
-<optgroup label="JAVA">
-    <option value="Java Introduction">11. Java Introduction</option>
-    <option value="Java Data Types & Variables">12. Java Data Types and Variables</option>
-    <option value="Java Operators">13. Java Operators</option>
-    <option value="Java Control Statements">14. Java Control Statements</option>
-    <option value="Java Methods">15. Java Methods</option>
-    <option value="Java Arrays & Strings">16. Java Arrays & Strings</option>
-    <option value="Java OOP">17. Java OOP</option>
-    <option value="Java Exception Handling">18. Java Exception Handling</option>
-    <option value="Java Collections">19. Java Collections</option>
-    <option value="Java File I/O">20. Java File I/O</option>
-</optgroup>
-
-<!-- ⚡ C++ TOPICS -->
-<optgroup label="C++">
-    <option value="Data Types & Operators">21. Data Types & Operators</option>
-    <option value="Control Structures">22. Control Structures</option>
-    <option value="Functions & Recursion">23. Functions & Recursion</option>
-    <option value="Arrays, Strings & Pointers">24. Arrays, Strings & Pointers</option>
-    <option value="Object-Oriented Programming">25. Object-Oriented Programming</option>
-    <option value="Constructors & Overloading">26. Constructors & Overloading</option>
-    <option value="Templates">27. Templates</option>
-    <option value="Exception Handling">28. Exception Handling</option>
-    <option value="STL">29. STL</option>
-    <option value="File Handling">30. File Handling</option>
-</optgroup>
-</select>
-                            
-                            <div class="quest-progress-summary">
-                                <div class="quest-prog-item">
-                                    <span>Floor Progress:</span>
-                                    <span class="highlight-green" id="floor-progress-text">0 / 3 Monsters Defeated</span>
+                            <h3 class="widget-title text-gold">Active Quests</h3>
+                            <div class="active-quests-list">
+                                <div class="quest-row" id="quest-item-easy">
+                                    <span class="quest-color-box bg-green"></span>
+                                    <span class="quest-name" id="quest-label-easy">The Slime of Sorting</span>
+                                    <span class="quest-status-tag text-green" id="quest-tag-easy">[IN PROGRESS]</span>
                                 </div>
+                                <div class="quest-row" id="quest-item-medium">
+                                    <span class="quest-color-box bg-purple"></span>
+                                    <span class="quest-name" id="quest-label-medium">The Skeleton of Stacks</span>
+                                    <span class="quest-status-tag text-gold" id="quest-tag-medium">[LEVEL 15]</span>
+                                </div>
+                                <div class="quest-row" id="quest-item-hard">
+                                    <span class="quest-color-box bg-red"></span>
+                                    <span class="quest-name" id="quest-label-hard">The Binary Tree Boss</span>
+                                    <span class="quest-status-tag text-red" id="quest-tag-hard">[LOCKED]</span>
+                                </div>
+                            </div>
+
+                            <!-- Chapter Selector Dropdown -->
+                            <div class="chapter-select-container">
+                                <select id="chapter-select" class="retro-dropdown">
+                                    <!-- 🐍 PYTHON TOPICS -->
+                                    <optgroup label="🐍 PYTHON">
+                                        <option value="Input and Output in Python">1. Input and Output in Python</option>
+                                        <option value="Variables & Data Types in Python" selected>2. Variables & Data Types in Python</option>
+                                        <option value="Operators in Python">3. Operators in Python</option>
+                                        <option value="Conditional Statements in Python">4. Conditional Statements in Python</option>
+                                        <option value="Loops in Python">5. Loops in Python</option>
+                                        <option value="Lists in Python">6. Lists in Python</option>
+                                        <option value="Tuples in Python">7. Tuples in Python</option>
+                                        <option value="Dictionaries in Python">8. Dictionaries in Python</option>
+                                        <option value="Sets in Python">9. Sets in Python</option>
+                                        <option value="Strings in Python">10. Strings in Python</option>
+                                    </optgroup>
+                                    <!-- ☕ JAVA TOPICS -->
+                                    <optgroup label="☕ JAVA">
+                                        <option value="Java Introduction">11. Java Introduction</option>
+                                        <option value="Java Data Types & Variables">12. Java Data Types and Variables</option>
+                                        <option value="Java Operators">13. Java Operators</option>
+                                        <option value="Java Control Statements">14. Java Control Statements</option>
+                                        <option value="Java Methods">15. Java Methods</option>
+                                        <option value="Java Arrays & Strings">16. Java Arrays & Strings</option>
+                                        <option value="Java OOP">17. Java OOP</option>
+                                        <option value="Java Exception Handling">18. Java Exception Handling</option>
+                                        <option value="Java Collections">19. Java Collections</option>
+                                        <option value="Java File I/O">20. Java File I/O</option>
+                                    </optgroup>
+                                    <!-- ⚡ C++ TOPICS -->
+                                    <optgroup label="⚡ C++">
+                                        <option value="Data Types & Operators">21. Data Types & Operators</option>
+                                        <option value="Control Structures">22. Control Structures</option>
+                                        <option value="Functions & Recursion">23. Functions & Recursion</option>
+                                        <option value="Arrays, Strings & Pointers">24. Arrays, Strings & Pointers</option>
+                                        <option value="Object-Oriented Programming">25. Object-Oriented Programming</option>
+                                        <option value="Constructors & Overloading">26. Constructors & Overloading</option>
+                                        <option value="Templates">27. Templates</option>
+                                        <option value="Exception Handling">28. Exception Handling</option>
+                                        <option value="STL">29. STL</option>
+                                        <option value="File Handling">30. File Handling</option>
+                                    </optgroup>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -254,12 +282,12 @@
                     <!-- Adventure Terminal Console -->
                     <div class="widget-box inner-window">
                         <div class="viewport-content widget-padding terminal-bg">
-                            <h3 class="widget-title text-green">Adventure Log</h3>
                             <div class="terminal-body" id="adventure-log">
-                                <div class="terminal-line">> Welcome to ALGOLINGO Dungeon, Hunter!</div>
-                                <div class="terminal-line">> You entered Floor 01.</div>
-                                <div class="terminal-line">> Sword of Logic equipped.</div>
-                                <div class="terminal-line">> Ready for quest _</div>
+                                <div class="terminal-line">> You entered Floor 01: The Foundation</div>
+                                <div class="terminal-line">> Sword of Logic equipped</div>
+                                <div class="terminal-line highlight-green">> HP Restored (+5)</div>
+                                <div class="terminal-line">> Analyzing sorting algorithm...</div>
+                                <div class="terminal-line text-green" id="terminal-cursor-line">> Ready for quest _</div>
                             </div>
                         </div>
                     </div>
@@ -415,7 +443,7 @@
                     <!-- Left: Knight Fighter -->
                     <div class="arena-fighter player-fighter" id="arena-player">
                         <div class="arena-sprite-container">
-                            <div class="knight-sprite animated-breathing" style="background-image: url('/static/items_spritesheet.png');"></div>
+                            <img src="{{ url_for('static', filename='hero.png') }}" class="arena-hero-img animated-breathing" id="arena-player-img" alt="Hero">
                             <div class="damage-number" id="player-dmg-popup">-15</div>
                             <div class="slash-overlay" id="player-slash"></div>
                         </div>
@@ -428,8 +456,7 @@
                     <!-- Right: Monster Fighter -->
                     <div class="arena-fighter monster-fighter" id="arena-monster">
                         <div class="arena-sprite-container">
-                            <!-- Dynamically loaded monster sprite classes -->
-                            <div class="monster-sprite animated-breathing" id="arena-monster-sprite" style="background-image: url('/static/monsters_spritesheet.png');"></div>
+                            <img src="{{ url_for('static', filename='slime.png') }}" class="arena-monster-img animated-breathing" id="arena-monster-img" alt="Monster">
                             <div class="damage-number" id="monster-dmg-popup">-25</div>
                             <div class="slash-overlay" id="monster-slash"></div>
                         </div>
@@ -450,19 +477,18 @@
                     <div class="viewport-content widget-padding bg-black">
                         <!-- Q Title & Progress -->
                         <div class="question-header">
-                            <span class="question-index" id="battle-q-num">Question 1 of 7</span>
-                            <span class="question-topic highlight-green" id="battle-q-topic">VARIABLES</span>
+                            <span class="question-index" id="battle-q-num">Question 1</span>
+                            <span class="question-topic highlight-green" id="battle-q-topic">ENCOUNTER</span>
                         </div>
                         
                         <!-- Question Text -->
                         <div class="question-body" id="battle-q-text">
-                            Which data type stores whole numbers?
+                            Summoning battle encounter...
                         </div>
 
                         <!-- Code Block (rendered if present) -->
-                        <div class="question-code-block" id="battle-code-container">
-                            <pre><code id="battle-code-content">x = 10
-print(type(x))</code></pre>
+                        <div class="question-code-block hidden" id="battle-code-container">
+                            <pre><code id="battle-code-content"></code></pre>
                         </div>
                     </div>
                 </div>
@@ -471,10 +497,10 @@ print(type(x))</code></pre>
                 <div class="battle-input-panel">
                     <!-- MCQ layout (4 buttons) -->
                     <div class="mcq-choices-grid" id="battle-mcq-choices">
-                        <button class="btn btn-stone choice-btn" data-choice="A">A) float</button>
-                        <button class="btn btn-stone choice-btn" data-choice="B">B) int</button>
-                        <button class="btn btn-stone choice-btn" data-choice="C">C) str</button>
-                        <button class="btn btn-stone choice-btn" data-choice="D">D) bool</button>
+                        <button class="btn btn-stone choice-btn hidden" data-choice="A">A)</button>
+                        <button class="btn btn-stone choice-btn hidden" data-choice="B">B)</button>
+                        <button class="btn btn-stone choice-btn hidden" data-choice="C">C)</button>
+                        <button class="btn btn-stone choice-btn hidden" data-choice="D">D)</button>
                     </div>
 
                     <!-- Fill-in-the-blank layout (text input) -->
@@ -486,7 +512,7 @@ print(type(x))</code></pre>
 
                 <!-- Battle Feedback Status bar -->
                 <div class="battle-status-bar terminal-bg">
-                    <div class="terminal-line" id="battle-status-text">> Choose a strike option to attack!</div>
+                    <div class="terminal-line" id="battle-status-text">> Engaging monster... Prepare for combat!</div>
                 </div>
 
                 <!-- Battle Exit Button (Disabled by default, enabled on victory/defeat) -->
@@ -510,7 +536,7 @@ print(type(x))</code></pre>
     </div>
 
     <!-- Core Javascript Data & Logic -->
-    
+    <script src="{{ url_for('static', filename='js/questions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

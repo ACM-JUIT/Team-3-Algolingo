@@ -91,10 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchQuestionsFromDB(topic, difficulty) {
         try {
             // Clean leading numbers and decode HTML entities
-            let cleanTopic = topic.replace(/^\d+\.\s*/, '').trim().replace(/&amp;/g, '&');
+            let cleanTopic = (topic || '').replace(/^\d+[\.\)]\s*/, '').trim().replace(/&amp;/g, '&');
             const language = getSelectedLanguage();
             
-            // Build query params using URLSearchParams to properly escape special chars like C++
+            // Build query params using URLSearchParams
             const params = new URLSearchParams();
             params.append('topic', cleanTopic);
             params.append('difficulty', difficulty);
@@ -103,16 +103,42 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const url = `/api/questions?${params.toString()}`;
-            console.log(`[API Fetching] ${url}`);
-
             const res = await fetch(url);
             const result = await res.json();
             
-            if (result.status === 'success') {
+            if (result.status === 'success' && result.data && result.data.length > 0) {
                 return result.data;
             }
         } catch (err) {
             console.error("Failed to fetch questions from API:", err);
+        }
+
+        // Local Fallback from QUESTIONS (questions.js)
+        if (typeof QUESTIONS !== 'undefined' && Array.isArray(QUESTIONS)) {
+            const normTopic = (topic || '').toLowerCase();
+            let matches = QUESTIONS.filter(q => {
+                const diffMatch = (q.difficulty || '').toLowerCase() === difficulty.toLowerCase();
+                const qTopic = (q.topic || '').toLowerCase();
+                const topicMatch = normTopic.includes(qTopic) || qTopic.includes(normTopic);
+                return diffMatch && topicMatch;
+            });
+            if (matches.length === 0) {
+                matches = QUESTIONS.filter(q => (q.difficulty || '').toLowerCase() === difficulty.toLowerCase());
+            }
+            if (matches.length > 0) {
+                return matches.map(q => ({
+                    id: q.id,
+                    topic: q.topic,
+                    difficulty: q.difficulty,
+                    question_type: q.type || 'mcq',
+                    question: q.question,
+                    options: q.options || [],
+                    correct_answer: q.answer,
+                    correct_option: q.type === 'mcq' ? q.answer : '',
+                    code_snippet: q.code || '',
+                    explanation: q.explanation || ''
+                }));
+            }
         }
         return [];
     }
@@ -210,18 +236,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const completedDiffQuestions = diffQuestions.filter(q => playerState.completed_questions.includes(q.id.toString()));
             const monsterContainer = document.getElementById(`monster-${diff}`);
             const hpLabel = document.getElementById(`monster-${diff}-hp`);
+            const questTag = document.getElementById(`quest-tag-${diff}`);
             
             let maxHp = diff === 'easy' ? 100 : (diff === 'medium' ? 150 : 200);
             
             if (diffQuestions.length === 0) {
                 if (monsterContainer) {
-                    monsterContainer.classList.remove('hidden');
+                    monsterContainer.classList.remove('defeated');
                     monsterContainer.style.opacity = '1';
                 }
                 if (hpLabel) hpLabel.textContent = `${maxHp}/${maxHp} HP`;
+                if (questTag) {
+                    questTag.textContent = diff === 'easy' ? "[IN PROGRESS]" : (diff === 'medium' ? "[LEVEL 15]" : "[LOCKED]");
+                    questTag.className = diff === 'easy' ? "quest-status-tag text-green" : (diff === 'medium' ? "quest-status-tag text-gold" : "quest-status-tag text-red");
+                }
                 continue;
-            } else if (monsterContainer) {
-                monsterContainer.classList.remove('hidden');
             }
 
             let unsolvedCount = diffQuestions.length - completedDiffQuestions.length;
@@ -229,14 +258,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hpLabel) hpLabel.textContent = `${currentHp}/${maxHp} HP`;
 
             if (currentHp === 0 && monsterContainer) {
-                monsterContainer.style.opacity = '0.35';
+                monsterContainer.classList.add('defeated');
                 const tag = monsterContainer.querySelector('.monster-name-tag');
                 if (tag) tag.style.borderColor = '#444';
                 if (hpLabel) {
                     hpLabel.textContent = "SLAYED";
                     hpLabel.style.color = '#777';
                 }
+                if (questTag) {
+                    questTag.textContent = "[DEFEATED]";
+                    questTag.className = "quest-status-tag text-green";
+                }
             } else if (monsterContainer) {
+                monsterContainer.classList.remove('defeated');
                 monsterContainer.style.opacity = '1';
                 if (hpLabel) hpLabel.style.color = '#fff';
                 const tag = monsterContainer.querySelector('.monster-name-tag');
@@ -245,12 +279,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (diff === 'medium') tag.className = 'monster-name-tag border-gold';
                     if (diff === 'hard') tag.className = 'monster-name-tag border-red';
                 }
+                if (questTag) {
+                    questTag.textContent = diff === 'easy' ? "[IN PROGRESS]" : (diff === 'medium' ? "[LEVEL 15]" : "[LOCKED]");
+                    questTag.className = diff === 'easy' ? "quest-status-tag text-green" : (diff === 'medium' ? "quest-status-tag text-gold" : "quest-status-tag text-red");
+                }
             }
         }
     }
 
     async function renderUI() {
-        if (goldAmount) goldAmount.textContent = playerState.gold.toLocaleString();
+        const formattedGold = playerState.gold.toLocaleString();
+        if (goldAmount) goldAmount.textContent = formattedGold;
+        const goldTop = document.getElementById('gold-amount-top');
+        if (goldTop) goldTop.textContent = formattedGold;
+
         if (heroLevelLabel) heroLevelLabel.textContent = `Level ${playerState.level} Coder`;
 
         if (hpText && hpProgressBar) {
@@ -276,8 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (potionCount) potionCount.textContent = `x${playerState.potions}`;
 
         if (chapterSelect && currentQuestTitle) {
-            const activeTopicName = chapterSelect.options[chapterSelect.selectedIndex].text.replace(/^\d+\.\s*/, '');
+            const activeTopicName = chapterSelect.options[chapterSelect.selectedIndex].text;
             currentQuestTitle.textContent = activeTopicName;
+            const viewportBar = document.getElementById('dungeon-viewport-bar');
+            if (viewportBar) viewportBar.textContent = `Dungeon Floor – ${activeTopicName}`;
         }
 
         if (floorProgressText) {
@@ -286,23 +330,219 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ==================== BATTLE SYSTEM ====================
+    // Quick Slot Potion Click
+    if (slotPotion) {
+        slotPotion.addEventListener('click', () => {
+            if (playerState.potions <= 0) {
+                logMessage("> No HP Potions remaining in inventory!", "err");
+                showAlert("Out of Potions", "You have no HP Potions left in your inventory!");
+                return;
+            }
+            if (playerState.hp >= 100) {
+                logMessage("> Your HP is already full (100/100)!", "standard");
+                return;
+            }
+            playerState.potions--;
+            playerState.hp = Math.min(100, playerState.hp + 25);
+            renderUI();
+            saveGameState();
+            logMessage(`> Consumed HP Potion! Restored +25 HP. (${playerState.hp}/100 HP)`, "gold");
+        });
+    }
+
+    // ==================== HERO MOVEMENT & DUNGEON MAP ENGINE ====================
+    const playerKnight = document.getElementById('player-knight');
+    const dungeonStage = document.getElementById('dungeon-stage');
+    const spaceTooltip = document.getElementById('space-tooltip');
+    const heroSlashFx = document.getElementById('hero-slash-fx');
+
+    let heroPos = { x: 360, y: 240 };
+    let heroFacing = 1;
+    let walkAnimTimeout = null;
+
+    const monstersData = {
+        easy: { id: 'monster-easy', name: 'The Slime of Sorting', x: 210, y: 210, diff: 'easy' },
+        medium: { id: 'monster-medium', name: 'The Skeleton of Stacks', x: 460, y: 175, diff: 'medium' },
+        hard: { id: 'monster-hard', name: 'The Binary Tree Boss', x: 610, y: 260, diff: 'hard' }
+    };
+
+    function getNearestMonster(threshold = 100) {
+        let nearest = null;
+        let minDist = Infinity;
+        for (const key of Object.keys(monstersData)) {
+            const m = monstersData[key];
+            const elem = document.getElementById(m.id);
+            if (elem && elem.classList.contains('defeated')) continue;
+            
+            const dist = Math.hypot((heroPos.x + 30) - (m.x + 33), (heroPos.y + 50) - (m.y + 33));
+            if (dist < minDist && dist <= threshold) {
+                minDist = dist;
+                nearest = m;
+            }
+        }
+        return nearest;
+    }
+
+    function updateHeroPosition() {
+        if (!playerKnight) return;
+        
+        // Clamped walkable area of isometric dungeon floor
+        heroPos.x = Math.max(130, Math.min(680, heroPos.x));
+        heroPos.y = Math.max(140, Math.min(350, heroPos.y));
+        
+        playerKnight.style.left = `${heroPos.x}px`;
+        playerKnight.style.top = `${heroPos.y}px`;
+        
+        if (heroFacing === -1) {
+            playerKnight.classList.add('facing-left');
+        } else {
+            playerKnight.classList.remove('facing-left');
+        }
+        
+        // Check proximity to monsters
+        const nearMonster = getNearestMonster(95);
+        if (nearMonster) {
+            if (spaceTooltip) {
+                spaceTooltip.textContent = `[SPACE] ATTACK ${nearMonster.name.toUpperCase()}`;
+                spaceTooltip.classList.remove('hidden');
+            }
+        } else {
+            if (spaceTooltip) {
+                spaceTooltip.classList.add('hidden');
+            }
+        }
+    }
+
+    function triggerHeroAttack(targetMonster) {
+        if (!targetMonster) return;
+        
+        heroFacing = targetMonster.x < heroPos.x ? -1 : 1;
+        updateHeroPosition();
+        
+        // Attack animation
+        if (playerKnight) {
+            playerKnight.style.transform = `scale(1.15) translateX(${heroFacing * 14}px)`;
+        }
+        if (heroSlashFx) {
+            heroSlashFx.classList.remove('hidden');
+        }
+        
+        const monsterElem = document.getElementById(targetMonster.id);
+        if (monsterElem) {
+            monsterElem.classList.add('hit');
+        }
+        
+        logMessage(`> Attacking ${targetMonster.name}! Engaging combat...`, "gold");
+        
+        setTimeout(() => {
+            if (playerKnight) playerKnight.style.transform = '';
+            if (heroSlashFx) heroSlashFx.classList.add('hidden');
+            if (monsterElem) monsterElem.classList.remove('hit');
+            
+            startBattle(playerState.current_quest, targetMonster.diff);
+        }, 260);
+    }
+
+    // Keyboard movement event listener
+    window.addEventListener('keydown', (e) => {
+        if ((battleModal && battleModal.style.display === 'flex') || (gameAlert && gameAlert.style.display === 'flex')) {
+            return;
+        }
+        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) {
+            return;
+        }
+
+        const step = 14;
+        let moved = false;
+
+        if (e.key === 'ArrowUp' || e.code === 'KeyW') {
+            heroPos.y -= step;
+            moved = true;
+        } else if (e.key === 'ArrowDown' || e.code === 'KeyS') {
+            heroPos.y += step;
+            moved = true;
+        } else if (e.key === 'ArrowLeft' || e.code === 'KeyA') {
+            heroPos.x -= step;
+            heroFacing = -1;
+            moved = true;
+        } else if (e.key === 'ArrowRight' || e.code === 'KeyD') {
+            heroPos.x += step;
+            heroFacing = 1;
+            moved = true;
+        } else if (e.code === 'Space') {
+            e.preventDefault();
+            const nearMonster = getNearestMonster(110);
+            if (nearMonster) {
+                triggerHeroAttack(nearMonster);
+            } else {
+                if (heroSlashFx) {
+                    heroSlashFx.classList.remove('hidden');
+                    setTimeout(() => heroSlashFx.classList.add('hidden'), 220);
+                }
+                logMessage("> Swung sword in thin air! Move closer to a monster to strike.", "standard");
+            }
+            return;
+        }
+
+        if (moved) {
+            e.preventDefault();
+            if (playerKnight) {
+                playerKnight.classList.add('walking');
+                clearTimeout(walkAnimTimeout);
+                walkAnimTimeout = setTimeout(() => {
+                    playerKnight.classList.remove('walking');
+                }, 160);
+            }
+            updateHeroPosition();
+        }
+    });
+
+    // Click on dungeon floor to move hero
+    if (dungeonStage) {
+        dungeonStage.addEventListener('click', (e) => {
+            if (e.target.closest('.target-monster') || e.target.closest('button')) return;
+            const rect = dungeonStage.getBoundingClientRect();
+            const targetX = e.clientX - rect.left - 30;
+            const targetY = e.clientY - rect.top - 50;
+            
+            heroFacing = targetX < heroPos.x ? -1 : 1;
+            heroPos.x = targetX;
+            heroPos.y = targetY;
+            
+            if (playerKnight) {
+                playerKnight.classList.add('walking');
+                setTimeout(() => playerKnight.classList.remove('walking'), 220);
+            }
+            updateHeroPosition();
+        });
+    }
+
+    // Direct monster click to engage
     targetMonsters.forEach(monster => {
-        monster.addEventListener('click', () => {
+        monster.addEventListener('click', (e) => {
+            e.stopPropagation();
             const diff = monster.getAttribute('data-difficulty');
-            startBattle(playerState.current_quest, diff);
+            const target = monstersData[diff];
+            triggerHeroAttack(target || { id: monster.id, name: diff.toUpperCase(), diff: diff, x: heroPos.x, y: heroPos.y });
         });
     });
 
     async function startBattle(topic, diff) {
-        const cleanTopic = topic.replace(/^\d+\.\s*/, '').trim();
+        const cleanTopic = (topic || '').replace(/^\d+[\.\)]\s*/, '').trim();
         const diffQuestions = await fetchQuestionsFromDB(cleanTopic, diff);
-        const unsolved = diffQuestions.filter(q => !playerState.completed_questions.includes(q.id.toString()));
         
         let maxHp = diff === 'easy' ? 100 : (diff === 'medium' ? 150 : 200);
         let monsterName = diff === 'easy' ? "SLIME OF VARIABLES" : (diff === 'medium' ? "SKELETON OF OPERATORS" : "BEHOLDER OF CONDITIONALS");
+
+        if (!diffQuestions || diffQuestions.length === 0) {
+            logMessage(`> No encounters found for ${diff.toUpperCase()} on this floor.`, "err");
+            showAlert("No Encounters", `No questions found for ${diff.toUpperCase()}. Please select another chapter.`);
+            return;
+        }
+
+        const unsolved = diffQuestions.filter(q => !playerState.completed_questions.includes(q.id.toString()));
         
-        if (diffQuestions.length > 0 && unsolved.length === 0) {
+        if (unsolved.length === 0) {
             logMessage(`> The ${monsterName} has already been defeated on this floor.`, "standard");
             showAlert("Monster Defeated", `The ${monsterName} is already slain! Select a different difficulty or chapter.`);
             return;
@@ -316,34 +556,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentBattle.active = true;
         currentBattle.difficulty = diff;
-        currentBattle.questions = unsolved.length > 0 ? unsolved : diffQuestions; 
+        currentBattle.questions = unsolved; // Load the actual questions for this difficulty
         currentBattle.currentIndex = 0;
         currentBattle.maxMonsterHp = maxHp;
-        currentBattle.monsterHp = currentBattle.questions.length > 0 ? Math.ceil((unsolved.length / Math.max(1, diffQuestions.length)) * maxHp) : maxHp;
-        
-        if (currentBattle.monsterHp <= 0) currentBattle.monsterHp = maxHp;
+        currentBattle.monsterHp = maxHp;
+        currentBattle.isAnswering = false;
 
         if (battleModal) battleModal.style.display = 'flex';
         
-        // 🎯 ALWAYS SHOW THE "RETURN TO MAP" BUTTON SO PLAYERS CAN EXIT ANYTIME
+        // Hide return button while actively in combat
         if (battleCloseBtn) {
-            battleCloseBtn.classList.remove('hidden');
+            battleCloseBtn.classList.add('hidden');
         }
         
-        // 🎯 RESET BATTLE STATUS TO ENGAGEMENT PROMPT (Hides previous victory/loss message)
         if (battleStatusText) {
-            battleStatusText.textContent = `> Engaged ${monsterName}! Answer questions to deal damage.`;
+            battleStatusText.textContent = `> Engaged ${monsterName}! Answer questions to strike.`;
         }
         
         if (battleHeaderDiff) battleHeaderDiff.textContent = `${diff.toUpperCase()} CHALLENGE`;
         if (battleHeaderMonster) battleHeaderMonster.textContent = monsterName;
         if (arenaMonsterLabel) arenaMonsterLabel.textContent = diff === 'easy' ? "SLIME" : (diff === 'medium' ? "SKELETON" : "BEHOLDER");
         
-        if (arenaMonsterSprite) {
-            arenaMonsterSprite.className = "monster-sprite animated-breathing";
-            if (diff === 'easy') arenaMonsterSprite.classList.add('green-slime-sprite');
-            if (diff === 'medium') arenaMonsterSprite.classList.add('skeleton-sprite');
-            if (diff === 'hard') arenaMonsterSprite.classList.add('beholder-sprite');
+        const arenaMonsterImg = document.getElementById('arena-monster-img');
+        if (arenaMonsterImg) {
+            if (diff === 'easy') arenaMonsterImg.src = '/static/slime.png';
+            if (diff === 'medium') arenaMonsterImg.src = '/static/skeleton.png';
+            if (diff === 'hard') arenaMonsterImg.src = '/static/beholder.png';
         }
 
         updateBattleHp();
@@ -362,6 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const choiceBtns = battleMcqChoices.querySelectorAll('.choice-btn');
         choiceBtns.forEach((btn, index) => {
             btn.onclick = () => {
+                if (currentBattle.isAnswering) return;
                 const letter = String.fromCharCode(65 + index); // A, B, C, D
                 const choiceText = btn.textContent.replace(/^[A-D]\)\s*/, '').trim();
                 submitAnswer(letter, choiceText);
@@ -370,6 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadBattleQuestion() {
+        if (!currentBattle.active) return;
         if (currentBattle.currentIndex >= currentBattle.questions.length) {
             endBattle(true);
             return;
@@ -377,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const q = currentBattle.questions[currentBattle.currentIndex];
         currentBattle.currentQuestion = q;
+        currentBattle.isAnswering = false; // Allow answering
 
         if (battleQNum) battleQNum.textContent = `Question ${currentBattle.currentIndex + 1} of ${currentBattle.questions.length}`;
         if (battleQTopic) battleQTopic.textContent = (q.topic || playerState.current_quest).toUpperCase();
@@ -410,12 +651,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (opts[i] !== undefined && opts[i] !== null && opts[i] !== '') {
                     choiceBtns[i].classList.remove('hidden');
                     choiceBtns[i].textContent = `${String.fromCharCode(65 + i)}) ${opts[i]}`;
+                    choiceBtns[i].disabled = false;
                 } else {
                     choiceBtns[i].classList.add('hidden');
                 }
             }
 
-            // Re-bind listeners on options load
             setupMcqListeners();
 
         } else {
@@ -423,6 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (battleFitbInputContainer) battleFitbInputContainer.classList.remove('hidden');
             if (battleFitbInput) {
                 battleFitbInput.value = '';
+                battleFitbInput.disabled = false;
                 battleFitbInput.focus();
             }
         }
@@ -430,6 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (battleFitbSubmit) {
         battleFitbSubmit.addEventListener('click', () => {
+            if (currentBattle.isAnswering) return;
             if (battleFitbInput) submitAnswer(battleFitbInput.value.trim());
         });
     }
@@ -437,29 +680,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (battleFitbInput) {
         battleFitbInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
+                if (currentBattle.isAnswering) return;
                 submitAnswer(battleFitbInput.value.trim());
             }
         });
     }
 
     function submitAnswer(userLetter, userText = '') {
+        if (!currentBattle.active || currentBattle.isAnswering) return;
         const q = currentBattle.currentQuestion;
         if (!q) return;
 
+        currentBattle.isAnswering = true; // Debounce so multiple clicks don't double fire
+
         const qType = (q.question_type || q.type || 'mcq').toLowerCase();
         
-        // Retrieve possible answer strings from DB
-        const dbCorrectOpt = (q.correct_option || '').toString().trim().toUpperCase(); // e.g. "C" or "OPTION_C"
-        const dbCorrectAns = (q.correct_answer || '').toString().trim().toUpperCase(); // e.g. "IT PROVIDES THE ENVIRONMENT REQUIRED TO RUN JAVA APPLICATIONS."
+        // Retrieve possible answer strings from DB / questions.js
+        const dbCorrectOpt = (q.correct_option || q.answer || '').toString().trim().toUpperCase();
+        const dbCorrectAns = (q.correct_answer || q.answer || '').toString().trim().toUpperCase();
 
         let isCorrect = false;
 
         if (qType === 'mcq') {
-            const letterClicked = userLetter.toUpperCase().trim();                     // e.g. "C"
-            const optionKey = `OPTION_${letterClicked}`;                               // e.g. "OPTION_C"
-            const textClicked = userText.toUpperCase().trim();                          // e.g. "IT PROVIDES THE ENVIRONMENT REQUIRED..."
+            const letterClicked = userLetter.toUpperCase().trim();
+            const optionKey = `OPTION_${letterClicked}`;
+            const textClicked = userText.toUpperCase().trim();
 
-            // Get text from q.options object/array for selected choice
             let selectedOptText = "";
             if (q.options) {
                 if (Array.isArray(q.options)) {
@@ -470,18 +716,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Comprehensive matching checks:
             if (
-                letterClicked === dbCorrectOpt ||                           // "C" === "C"
-                optionKey === dbCorrectOpt ||                               // "OPTION_C" === "OPTION_C"
-                letterClicked === dbCorrectAns ||                           // "C" === "C"
-                (textClicked !== '' && textClicked === dbCorrectAns) ||     // Full text clicked matches DB correct answer
-                (selectedOptText !== '' && selectedOptText === dbCorrectAns) // Option text matches DB correct answer
+                letterClicked === dbCorrectOpt ||
+                optionKey === dbCorrectOpt ||
+                letterClicked === dbCorrectAns ||
+                (textClicked !== '' && textClicked === dbCorrectAns) ||
+                (selectedOptText !== '' && selectedOptText === dbCorrectAns)
             ) {
                 isCorrect = true;
             }
         } else {
-            // FITB Check
             const cleanUser = userLetter.toLowerCase().replace(/['"]/g, '').trim();
             const cleanAns = dbCorrectAns.toLowerCase().replace(/['"]/g, '').trim();
             isCorrect = (cleanUser === cleanAns);
@@ -502,8 +746,8 @@ document.addEventListener('DOMContentLoaded', () => {
             playerState.completed_questions.push(qIdStr);
         }
 
-        const diffQuestionsCount = currentBattle.questions.length || 1;
-        const dmg = Math.ceil(currentBattle.maxMonsterHp / diffQuestionsCount);
+        const totalQ = currentBattle.questions.length || 1;
+        const dmg = Math.ceil(currentBattle.maxMonsterHp / totalQ);
         
         currentBattle.monsterHp = Math.max(0, currentBattle.monsterHp - dmg);
         updateBattleHp();
@@ -519,8 +763,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (arenaMonsterSprite) arenaMonsterSprite.classList.add('flash-dmg');
 
-        if (battleStatusText) battleStatusText.textContent = `> CRITICAL STRIKE! You dealt ${dmg} damage to the monster!`;
-        logMessage(`> Solved question: Dealt ${dmg} damage to Monster!`, "standard");
+        if (battleStatusText) battleStatusText.textContent = `> CRITICAL STRIKE! Correct! You dealt ${dmg} damage!`;
+        logMessage(`> Correct answer! Dealt ${dmg} damage to monster!`, "standard");
 
         setTimeout(() => {
             if (monsterSlash) monsterSlash.classList.remove('active');
@@ -528,12 +772,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (arenaMonsterSprite) arenaMonsterSprite.classList.remove('flash-dmg');
             
             currentBattle.currentIndex++;
-            if (currentBattle.monsterHp <= 0) {
+            if (currentBattle.monsterHp <= 0 || currentBattle.currentIndex >= currentBattle.questions.length) {
                 endBattle(true);
             } else {
-                loadBattleQuestion();
+                loadBattleQuestion(); // ADVANCE TO THE NEXT QUESTION!
             }
-        }, 1000);
+        }, 650);
     }
 
     function handleMonsterAttack() {
@@ -554,25 +798,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (battleWindow) battleWindow.classList.add('shake');
-        logMessage(`> Failed Question: Monster counters, dealing ${penaltyDmg} damage!`, "err");
+        logMessage(`> Incorrect! Monster strikes back, dealing ${penaltyDmg} damage!`, "err");
 
-        if (battleStatusText) battleStatusText.textContent = `> MISS! The monster counters and strikes you for ${penaltyDmg} HP!`;
+        if (battleStatusText) battleStatusText.textContent = `> INCORRECT! The monster counters and strikes you for ${penaltyDmg} HP!`;
 
         setTimeout(() => {
             if (playerSlash) playerSlash.classList.remove('active');
             if (playerDmgPopup) playerDmgPopup.classList.remove('active');
             if (battleWindow) battleWindow.classList.remove('shake');
+            currentBattle.isAnswering = false;
 
             if (playerState.hp <= 0) {
                 endBattle(false);
             }
-        }, 1000);
+        }, 750);
     }
 
     function endBattle(victory) {
         currentBattle.active = false;
         
-        // 🎯 UNHIDE RETURN TO MAP BUTTON ONLY AFTER BATTLE ENDS
+        // Unhide RETURN TO MAP button on combat end
         if (battleCloseBtn) battleCloseBtn.classList.remove('hidden');
 
         if (victory) {
@@ -596,9 +841,8 @@ document.addEventListener('DOMContentLoaded', () => {
             logMessage(`> VICTORY! Slain the ${monsterLabelName}!`, "gold");
             logMessage(`> Earned rewards: +${xpReward} XP, +${goldReward} GP!`, "gold");
 
-            // 🎯 SHOW VICTORY MESSAGE ONLY NOW
             if (battleStatusText) {
-                battleStatusText.textContent = `> VICTORY! You have slain the monster! Recycled logs: +${xpReward} XP, +${goldReward} GP!`;
+                battleStatusText.textContent = `> VICTORY! You have slain the monster! Earned: +${xpReward} XP, +${goldReward} GP!`;
             }
             
             let xpRequired = playerState.level * 1000;
@@ -608,6 +852,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 playerState.hp = 100;
                 logMessage(`> LEVEL UP! Reached Level ${playerState.level}! Health fully restored.`, "gold");
                 showLevelUpAlert();
+            }
+
+            // Immediately mark monster slayed on the isometric map
+            const diff = currentBattle.difficulty;
+            const monsterElem = document.getElementById(`monster-${diff}`);
+            if (monsterElem) {
+                monsterElem.classList.add('defeated');
+                const hpLabel = document.getElementById(`monster-${diff}-hp`);
+                if (hpLabel) {
+                    hpLabel.textContent = "SLAYED";
+                    hpLabel.style.color = '#777';
+                }
+            }
+            const questTag = document.getElementById(`quest-tag-${diff}`);
+            if (questTag) {
+                questTag.textContent = "[DEFEATED]";
+                questTag.className = "quest-status-tag text-green";
             }
 
             renderUI();
