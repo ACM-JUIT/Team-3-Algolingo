@@ -34,7 +34,9 @@
                 </div>
 
                 <!-- Live Notification/Error Banner -->
-                <div id="message-banner" class="message-banner hidden"></div>
+                <div id="message-banner" class="message-banner {% if error %}error{% else %}hidden{% endif %}">
+                    {% if error %}{{ error }}{% endif %}
+                </div>
 
                 <!-- Form Panel -->
 <form id="signup-form" method="POST" action="/register" novalidate>
@@ -46,6 +48,7 @@
             id="fullname"
             name="username"
             placeholder=" "
+            value="{{ username if username else '' }}"
             required
             autocomplete="name"
         >
@@ -60,6 +63,7 @@
             id="email"
             name="email"
             placeholder=" "
+            value="{{ email if email else '' }}"
             required
             autocomplete="email"
         >

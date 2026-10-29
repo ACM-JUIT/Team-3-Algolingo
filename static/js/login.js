@@ -76,18 +76,42 @@ document.addEventListener('DOMContentLoaded', () => {
             setFieldError(passwordInput, 'password-error', '');
         }
 
-        // Form Submission Execution Simulation
+        // Form Submission Execution
         if (isFormValid) {
             const submitButton = loginForm.querySelector('.btn-submit');
+            const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
             submitButton.textContent = 'Authenticating...';
 
-            setTimeout(() => {
-                displayBanner('Welcome back, Hero! Loading your Quest panel...', 'success');
-                setTimeout(() => {
-                    loginForm.submit(); // Actually submit to /login
-                }, 1200);
-            }, 800);
+            const formData = new FormData(loginForm);
+
+            fetch('/login', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async (response) => {
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    const message = data.message || 'Invalid email or password.';
+                    displayBanner(message, 'error');
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                } else {
+                    displayBanner('Welcome back, Hero! Loading your Quest panel...', 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/dashboard';
+                    }, 800);
+                }
+            })
+            .catch((err) => {
+                console.error('Login error:', err);
+                displayBanner('A network error occurred. Please try again.', 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            });
         } else {
             displayBanner('Please correct the highlighted errors above before proceeding.', 'error');
         }

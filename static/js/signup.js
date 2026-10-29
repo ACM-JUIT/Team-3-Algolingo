@@ -101,18 +101,47 @@ document.addEventListener('DOMContentLoaded', () => {
             setFieldError(null, 'terms-error', '');
         }
 
-        // Form Submission Execution Simulation
+        // Form Submission Execution
         if (isFormValid) {
             const submitButton = signupForm.querySelector('.btn-submit');
+            const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
             submitButton.textContent = 'Creating Adventurer Profile...';
 
-            setTimeout(() => {
-                displayBanner('Account created successfully! Preparing your custom workspace...', 'success');
-                setTimeout(() => {
-                    signupForm.submit(); // Actually submit to /register
-                }, 1200);
-            }, 800);
+            const formData = new FormData(signupForm);
+
+            fetch('/register', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async (response) => {
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    const message = data.message || 'Registration failed. Please try again.';
+                    displayBanner(message, 'error');
+                    if (data.field === 'email') {
+                        setFieldError(emailInput, 'email-error', message);
+                    } else if (data.field === 'username') {
+                        setFieldError(nameInput, 'name-error', message);
+                    }
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                } else {
+                    displayBanner(data.message || 'Account created successfully! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/login?registered=1';
+                    }, 1000);
+                }
+            })
+            .catch((err) => {
+                console.error('Registration error:', err);
+                displayBanner('A network error occurred. Please try again.', 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            });
         } else {
             displayBanner('Please resolve the errors highlighted below to initialize registration.', 'error');
         }
