@@ -8,13 +8,16 @@ try:
         port="5432"
     )
     cursor = conn.cursor()
-    # Ensure users table has gamification columns
+    # Ensure users table has gamification and oauth columns
     try:
         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1;")
         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0;")
         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS gold INTEGER DEFAULT 1250;")
         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS hp INTEGER DEFAULT 100;")
         cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS completed_questions TEXT DEFAULT '';")
+        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT;")
+        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT 'local';")
+        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture TEXT;")
         conn.commit()
         print("Database schema verified and updated successfully.")
     except Exception as db_err:
@@ -36,7 +39,10 @@ except Exception as e:
                 xp INTEGER DEFAULT 0,
                 gold INTEGER DEFAULT 1250,
                 hp INTEGER DEFAULT 100,
-                completed_questions TEXT DEFAULT ''
+                completed_questions TEXT DEFAULT '',
+                google_id TEXT,
+                provider TEXT DEFAULT 'local',
+                profile_picture TEXT
             );
         """)
         sqlite_cur.execute("""
@@ -58,6 +64,26 @@ except Exception as e:
                 correct_option TEXT
             );
         """)
+        sqlite_conn.commit()
+
+        # Ensure SQLite users table has gamification and oauth columns for existing databases
+        sqlite_cur.execute("PRAGMA table_info(users)")
+        existing_cols = {row[1] for row in sqlite_cur.fetchall()}
+        for col, col_type, default_val in [
+            ("level", "INTEGER", "1"),
+            ("xp", "INTEGER", "0"),
+            ("gold", "INTEGER", "1250"),
+            ("hp", "INTEGER", "100"),
+            ("completed_questions", "TEXT", "''"),
+            ("google_id", "TEXT", "NULL"),
+            ("provider", "TEXT", "'local'"),
+            ("profile_picture", "TEXT", "NULL")
+        ]:
+            if col not in existing_cols:
+                try:
+                    sqlite_cur.execute(f"ALTER TABLE users ADD COLUMN {col} {col_type} DEFAULT {default_val};")
+                except Exception as col_err:
+                    print(f"Notice: Column {col} could not be added: {col_err}")
         sqlite_conn.commit()
         
         sqlite_cur.execute("SELECT count(*) FROM questions;")
@@ -152,9 +178,18 @@ except Exception as e:
             def __init__(self, conn):
                 self.conn = conn
             def _get_cur(self):
-                if not hasattr(_thread_local, "cur") or _thread_local.cur is None:
-                    _thread_local.cur = self.conn.cursor()
-                return _thread_local.cur
+                attr = f"_cur_{id(self.conn)}"
+                cur = getattr(_thread_local, attr, None)
+                if cur is not None:
+                    try:
+                        # Verify the cursor's underlying connection is still active
+                        _ = cur.connection
+                    except Exception:
+                        cur = None
+                if cur is None:
+                    cur = self.conn.cursor()
+                    setattr(_thread_local, attr, cur)
+                return cur
             def execute(self, query, params=None):
                 translated_query = query.replace('%s', '?').replace('ILIKE', 'LIKE').replace('ilike', 'like')
                 cur = self._get_cur()
@@ -169,6 +204,14 @@ except Exception as e:
             def fetchall(self):
                 with _db_lock:
                     return self._get_cur().fetchall()
+            @property
+            def lastrowid(self):
+                with _db_lock:
+                    return self._get_cur().lastrowid
+            @property
+            def rowcount(self):
+                with _db_lock:
+                    return self._get_cur().rowcount
                 
         class SqliteConnWrapper:
             def __init__(self, conn):
@@ -181,6 +224,15 @@ except Exception as e:
                     self.conn.rollback()
             def cursor(self):
                 return SqliteCursorWrapper(self.conn)
+            def close(self):
+                attr = f"_cur_{id(self.conn)}"
+                if hasattr(_thread_local, attr):
+                    try:
+                        delattr(_thread_local, attr)
+                    except Exception:
+                        pass
+                with _db_lock:
+                    self.conn.close()
                 
         conn = SqliteConnWrapper(sqlite_conn)
         cursor = conn.cursor()

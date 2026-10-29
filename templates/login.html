@@ -34,7 +34,13 @@
                 </div>
 
                 <!-- Live Notification/Error Banner -->
-                <div id="message-banner" class="message-banner hidden"></div>
+                <div id="message-banner" class="message-banner {% if error %}error{% elif request.args.get('registered') %}success{% else %}hidden{% endif %}">
+                    {% if error %}
+                        {{ error }}
+                    {% elif request.args.get('registered') %}
+                        Account created successfully! Please log in with your credentials.
+                    {% endif %}
+                </div>
 
                <!-- Form Panel -->
 <form id="login-form" method="POST" action="/login" novalidate>
@@ -46,6 +52,7 @@
             id="email"
             name="email"
             placeholder=" "
+            value="{{ email if email else '' }}"
             required
             autocomplete="email"
         >
