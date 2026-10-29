@@ -8,3 +8,4 @@ cffi==2.0.0
 pycparser==2.23
 joserfc==1.7.2
 gunicorn
+requests==2.34.2
